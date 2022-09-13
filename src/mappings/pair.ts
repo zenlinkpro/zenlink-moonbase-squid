@@ -45,7 +45,7 @@ export async function handleTransfer(ctx: EvmLogHandlerContext<Store>): Promise<
   if (data.to === ADDRESS_ZERO && data.value.toBigInt() === 1000n) {
     return
   }
-  const transactionHash = ctx.event.extrinsic.hash
+  const transactionHash = ctx.event.evmTxHash
 
   // user stats
   let { from, to } = data
@@ -60,7 +60,7 @@ export async function handleTransfer(ctx: EvmLogHandlerContext<Store>): Promise<
   const value = convertTokenToDecimal(data.value.toBigInt(), 18)
 
   // get or create transaction
-  let transaction = await getTransaction(ctx, ctx.event.extrinsic.hash)
+  let transaction = await getTransaction(ctx, ctx.event.evmTxHash)
   if (!transaction) {
     transaction = new Transaction({
       id: transactionHash,
@@ -419,10 +419,10 @@ export async function handleSwap(ctx: EvmLogHandlerContext<Store>): Promise<void
   factory.txCount += 1
   await ctx.store.save(factory)
 
-  let transaction = await getTransaction(ctx, ctx.event.extrinsic.hash)
+  let transaction = await getTransaction(ctx, ctx.event.evmTxHash)
   if (!transaction) {
     transaction = new Transaction({
-      id: ctx.event.extrinsic.hash,
+      id: ctx.event.evmTxHash,
       blockNumber: BigInt(ctx.block.height),
       timestamp: new Date(ctx.block.timestamp),
       mints: [],
@@ -504,7 +504,7 @@ export async function handleSwap(ctx: EvmLogHandlerContext<Store>): Promise<void
 }
 
 export async function handleMint(ctx: EvmLogHandlerContext<Store>): Promise<void> {
-  const transaction = await ctx.store.get(Transaction, ctx.event.extrinsic.hash)
+  const transaction = await ctx.store.get(Transaction, ctx.event.evmTxHash)
   // safety check
   if (!transaction) return
   const { mints } = transaction
@@ -559,7 +559,7 @@ export async function handleMint(ctx: EvmLogHandlerContext<Store>): Promise<void
 }
 
 export async function handleBurn(ctx: EvmLogHandlerContext<Store>): Promise<void> {
-  const transaction = await ctx.store.get(Transaction, ctx.event.extrinsic.hash)
+  const transaction = await ctx.store.get(Transaction, ctx.event.evmTxHash)
   if (!transaction) return
   const { burns } = transaction
   const burn = (await ctx.store.get(Burn, burns[burns.length - 1]))!

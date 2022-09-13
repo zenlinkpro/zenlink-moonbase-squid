@@ -35,7 +35,7 @@ export async function handleStableSwapNewFee(ctx: EvmLogHandlerContext<Store>): 
   await ctx.store.save(stableSwap)
 
   const log = new StableSwapEvent({
-    id: `new_fee-${ctx.event.extrinsic.hash}`,
+    id: `new_fee-${ctx.event.evmTxHash}`,
     stableSwap,
     data: new StableSwapNewFeeEventData({
       swapFee: event.fee.toBigInt(),
@@ -43,7 +43,7 @@ export async function handleStableSwapNewFee(ctx: EvmLogHandlerContext<Store>): 
     }),
     block: BigInt(ctx.block.height),
     timestamp: BigInt(ctx.block.timestamp),
-    transaction: decodeHex(ctx.event.extrinsic.hash)
+    transaction: decodeHex(ctx.event.evmTxHash)
   })
 
   await ctx.store.save(log)
@@ -56,7 +56,7 @@ export async function handleRampA(ctx: EvmLogHandlerContext<Store>): Promise<voi
     .decode(ctx.event.args.log)
 
   const log = new StableSwapEvent({
-    id: `ramp_A-${ctx.event.extrinsic.hash}`,
+    id: `ramp_A-${ctx.event.evmTxHash}`,
     stableSwap,
     data: new StableSwapRampAEventData({
       oldA: event.oldA.toBigInt(),
@@ -66,7 +66,7 @@ export async function handleRampA(ctx: EvmLogHandlerContext<Store>): Promise<voi
     }),
     block: BigInt(ctx.block.height),
     timestamp: BigInt(ctx.block.timestamp),
-    transaction: decodeHex(ctx.event.extrinsic.hash)
+    transaction: decodeHex(ctx.event.evmTxHash)
   })
 
   await ctx.store.save(log)
@@ -82,7 +82,7 @@ export async function handleStopRampA(ctx: EvmLogHandlerContext<Store>): Promise
   await ctx.store.save(stableSwap)
 
   const log = new StableSwapEvent({
-    id: `stop_ramp_A-${ctx.event.extrinsic.hash}`,
+    id: `stop_ramp_A-${ctx.event.evmTxHash}`,
     stableSwap,
     data: new StableSwapStopRampAEventData({
       currentA: event.A.toBigInt(),
@@ -90,7 +90,7 @@ export async function handleStopRampA(ctx: EvmLogHandlerContext<Store>): Promise
     }),
     block: BigInt(ctx.block.height),
     timestamp: BigInt(ctx.block.timestamp),
-    transaction: decodeHex(ctx.event.extrinsic.hash)
+    transaction: decodeHex(ctx.event.evmTxHash)
   })
 
   await ctx.store.save(log)
@@ -110,7 +110,7 @@ export async function handleStableSwapAddLiquidity(ctx: EvmLogHandlerContext<Sto
     .decode(ctx.event.args.log)
 
   const log = new StableSwapEvent({
-    id: `add_liquidity-${ctx.event.extrinsic.hash}`,
+    id: `add_liquidity-${ctx.event.evmTxHash}`,
     stableSwap,
     data: new StableSwapAddLiquidityEventData({
       provider: decodeHex(event.provider),
@@ -121,7 +121,7 @@ export async function handleStableSwapAddLiquidity(ctx: EvmLogHandlerContext<Sto
     }),
     block: BigInt(ctx.block.height),
     timestamp: BigInt(ctx.block.timestamp),
-    transaction: decodeHex(ctx.event.extrinsic.hash)
+    transaction: decodeHex(ctx.event.evmTxHash)
   })
 
   await ctx.store.save(log)
@@ -141,7 +141,7 @@ export async function handleStableSwapRemoveLiquidity(ctx: EvmLogHandlerContext<
     .decode(ctx.event.args.log)
 
   const log = new StableSwapEvent({
-    id: `remove_liquidity-${ctx.event.extrinsic.hash}`,
+    id: `remove_liquidity-${ctx.event.evmTxHash}`,
     stableSwap,
     data: new StableSwapRemoveLiquidityEventData({
       provider: decodeHex(event.provider),
@@ -150,7 +150,7 @@ export async function handleStableSwapRemoveLiquidity(ctx: EvmLogHandlerContext<
     }),
     block: BigInt(ctx.block.height),
     timestamp: BigInt(ctx.block.timestamp),
-    transaction: decodeHex(ctx.event.extrinsic.hash)
+    transaction: decodeHex(ctx.event.evmTxHash)
   })
 
   await ctx.store.save(log)
@@ -179,7 +179,7 @@ export async function handleStableSwapRemoveLiquidityOne(ctx: EvmLogHandlerConte
   }
 
   const log = new StableSwapEvent({
-    id: `remove_liquidity_one-${ctx.event.extrinsic.hash}`,
+    id: `remove_liquidity_one-${ctx.event.evmTxHash}`,
     stableSwap,
     data: new StableSwapRemoveLiquidityEventData({
       provider: decodeHex(event.provider),
@@ -187,7 +187,7 @@ export async function handleStableSwapRemoveLiquidityOne(ctx: EvmLogHandlerConte
     }),
     block: BigInt(ctx.block.height),
     timestamp: BigInt(ctx.block.timestamp),
-    transaction: decodeHex(ctx.event.extrinsic.hash)
+    transaction: decodeHex(ctx.event.evmTxHash)
   })
 
   await ctx.store.save(log)
@@ -207,7 +207,7 @@ export async function handleStableSwapRemoveLiquidityImbalance(ctx: EvmLogHandle
     .decode(ctx.event.args.log)
 
   const log = new StableSwapEvent({
-    id: `remove_liquidity_imbalance-${ctx.event.extrinsic.hash}`,
+    id: `remove_liquidity_imbalance-${ctx.event.evmTxHash}`,
     stableSwap,
     data: new StableSwapRemoveLiquidityEventData({
       provider: decodeHex(event.provider),
@@ -217,7 +217,7 @@ export async function handleStableSwapRemoveLiquidityImbalance(ctx: EvmLogHandle
     }),
     block: BigInt(ctx.block.height),
     timestamp: BigInt(ctx.block.timestamp),
-    transaction: decodeHex(ctx.event.extrinsic.hash)
+    transaction: decodeHex(ctx.event.evmTxHash)
   })
 
   await ctx.store.save(log)
@@ -250,7 +250,7 @@ export async function handleStableSwapExchange(ctx: EvmLogHandlerContext<Store>)
     .decode(ctx.event.args.log)
 
   const exchange = new StableSwapExchange({
-    id: `token_exchange-${ctx.event.extrinsic.hash}`,
+    id: `token_exchange-${ctx.event.evmTxHash}`,
     stableSwap,
     data: new StableSwapTokenExchangeData({
       buyer: decodeHex(event.buyer),
@@ -261,7 +261,7 @@ export async function handleStableSwapExchange(ctx: EvmLogHandlerContext<Store>)
     }),
     block: BigInt(ctx.block.height),
     timestamp: BigInt(ctx.block.timestamp),
-    transaction: decodeHex(ctx.event.extrinsic.hash)
+    transaction: decodeHex(ctx.event.evmTxHash)
   })
 
   await ctx.store.save(exchange)

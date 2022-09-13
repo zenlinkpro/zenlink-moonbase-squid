@@ -18,7 +18,7 @@ export async function handleConvertPair(ctx: EvmLogHandlerContext<Store>): Promi
   const { sender, token0, token1, amount0, amount1, amountZLK } = event
 
   const log = new ZenlinkMakerConvertEvent({
-    id: `convert_pair-${ctx.event.extrinsic.hash}`,
+    id: `convert_pair-${ctx.event.evmTxHash}-${ctx.event.indexInBlock}`,
     contract: ctx.event.args.log.address,
     data: new ZenlinkMakerConvertPairData({
       sender,
@@ -30,7 +30,7 @@ export async function handleConvertPair(ctx: EvmLogHandlerContext<Store>): Promi
     }),
     block: BigInt(ctx.block.height),
     timestamp: BigInt(ctx.block.timestamp),
-    transaction: decodeHex(ctx.event.extrinsic.hash)
+    transaction: decodeHex(ctx.event.evmTxHash)
   })
   await ctx.store.save(log)
 
@@ -49,7 +49,7 @@ export async function handleConvertStableSwap(ctx: EvmLogHandlerContext<Store>):
   const { sender, token, pool, amount, amountZLK } = event
 
   const log = new ZenlinkMakerConvertEvent({
-    id: `convert_pair-${ctx.event.extrinsic.hash}`,
+    id: `convert_stable_swap-${ctx.event.evmTxHash}-${ctx.event.indexInBlock}`,
     contract: ctx.event.args.log.address,
     data: new ZenlinkMakerConvertStableSwapData({
       sender,
@@ -60,7 +60,7 @@ export async function handleConvertStableSwap(ctx: EvmLogHandlerContext<Store>):
     }),
     block: BigInt(ctx.block.height),
     timestamp: BigInt(ctx.block.timestamp),
-    transaction: decodeHex(ctx.event.extrinsic.hash)
+    transaction: decodeHex(ctx.event.evmTxHash)
   })
   await ctx.store.save(log)
 
