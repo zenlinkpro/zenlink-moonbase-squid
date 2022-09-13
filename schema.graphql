@@ -521,3 +521,50 @@ type ZenlinkDayInfo @entity {
   dailyVolumeUSD: String!
   tvlUSD: String!
 }
+
+type ZenlinkMakerInfo @entity {
+  id: ID!
+  updatedDate: DateTime!
+
+  totalAmount: String!
+  totalUSD: String!
+  dayData: [ZenlinkMakerDayData!] @derivedFrom(field: "info")
+}
+
+type ZenlinkMakerDayData @entity {
+  id: ID!
+  date: DateTime!
+
+  dailyAmount: String!
+  dailyUSD: String!
+  info: ZenlinkMakerInfo!
+}
+
+type ZenlinkMakerConvertEvent @entity{
+  id: ID!
+  contract: String!
+  data: ZenlinkMakerConvertData
+
+  block: BigInt!
+  timestamp: BigInt!
+  transaction: Bytes!
+}
+
+union ZenlinkMakerConvertData = ZenlinkMakerConvertPairData | ZenlinkMakerConvertStableSwapData
+
+type ZenlinkMakerConvertPairData {
+  sender: String!
+  token0: String!
+  token1: String!
+  amount0: BigInt!
+  amount1: BigInt!
+  amountZLK: BigInt!
+}
+
+type ZenlinkMakerConvertStableSwapData {
+  sender: String!
+  pool: String!
+  token: String!
+  amount: BigInt!
+  amountZLK: BigInt!
+}

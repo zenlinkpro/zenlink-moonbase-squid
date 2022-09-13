@@ -1,13 +1,14 @@
 import { CommonHandlerContext } from "@subsquid/substrate-processor"
 import { Store } from "@subsquid/typeorm-store"
-import { FACTORY_ADDRESS, ZERO_BD } from "../consts"
+import { FACTORY_ADDRESS, ZENLINK_MAKER, ZERO_BD } from "../consts"
 import {
   Bundle,
   Factory,
   LiquidityPosition,
   StableSwapInfo,
   Transaction,
-  ZenlinkInfo
+  ZenlinkInfo,
+  ZenlinkMakerInfo
 } from "../model"
 
 export async function getTransaction(ctx: CommonHandlerContext<Store>, id: string) {
@@ -73,4 +74,20 @@ export async function getZenlinkInfo(ctx: CommonHandlerContext<Store>) {
   }
 
   return zenlinkInfo
+}
+
+export async function getZenlinkMakerInfo(ctx: CommonHandlerContext<Store>) {
+  let zenlinkMakerInfo = await ctx.store.get(ZenlinkMakerInfo, ZENLINK_MAKER)
+  if (!zenlinkMakerInfo) {
+    zenlinkMakerInfo = new ZenlinkMakerInfo({
+      id: ZENLINK_MAKER,
+      updatedDate: new Date(ctx.block.timestamp),
+      totalAmount: ZERO_BD.toString(),
+      totalUSD: ZERO_BD.toString(),
+      dayData: []
+    })
+    await ctx.store.save(zenlinkMakerInfo)
+  }
+
+  return zenlinkMakerInfo
 }

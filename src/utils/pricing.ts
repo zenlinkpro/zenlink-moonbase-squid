@@ -9,6 +9,7 @@ import { Pair, StableSwap } from "../model"
 
 export const WNATIVE = '0x674421E9567653EE76e96fEEA3B2B2966d000Dbd'.toLowerCase()
 export const USDC = '0x1E80A824Ed280c5Ee783D76fdcB634a67C95Edb7'.toLowerCase()
+export const ZLK = '0xB5989e3Eb10bBe04b962586910C0bBC1238baD78'.toLowerCase()
 export const WNATIVE_USDC = '0xA82e5eF8Ca4670a59129aB09Af5c895D5712Fa3b'.toLowerCase()
 
 export const WHITELIST: string[] = [

@@ -1,23 +1,26 @@
 import { lookupArchive } from "@subsquid/archive-registry";
 import { EvmLogHandlerContext, SubstrateBatchProcessor } from "@subsquid/substrate-processor";
 import { Store, TypeormDatabase } from "@subsquid/typeorm-store";
-import { CHAIN_NODE, FACTORY_ADDRESS, FOUR_POOL } from "./consts";
-import * as factory from './abis/factory'
-import * as pair from './abis/pair'
+import { CHAIN_NODE, FACTORY_ADDRESS, FOUR_POOL, ZENLINK_MAKER } from "./consts";
 import { handleNewPair } from "./mappings/factory";
 import { Pair } from "./model";
 import { handleBurn, handleMint, handleSwap, handleSync, handleTransfer } from "./mappings/pair";
-import * as StableSwapContract from "./abis/StableSwap"
-import { 
-  handleRampA, 
-  handleStableSwapAddLiquidity, 
-  handleStableSwapExchange, 
-  handleStableSwapNewFee, 
-  handleStableSwapRemoveLiquidity, 
-  handleStableSwapRemoveLiquidityImbalance, 
-  handleStableSwapRemoveLiquidityOne, 
-  handleStopRampA 
+import {
+  handleRampA,
+  handleStableSwapAddLiquidity,
+  handleStableSwapExchange,
+  handleStableSwapNewFee,
+  handleStableSwapRemoveLiquidity,
+  handleStableSwapRemoveLiquidityImbalance,
+  handleStableSwapRemoveLiquidityOne,
+  handleStopRampA
 } from "./mappings/stableSwap";
+import { handleConvertPair, handleConvertStableSwap } from "./mappings/zenlinkMaker";
+import * as factory from './abis/factory'
+import * as pair from './abis/pair'
+import * as StableSwapContract from "./abis/StableSwap"
+import * as ZenlinkMakerContract from './abis/ZenlinkMaker'
+
 
 const database = new TypeormDatabase()
 const processor = new SubstrateBatchProcessor()
@@ -55,6 +58,15 @@ const processor = new SubstrateBatchProcessor()
       ],
     ],
     range: { from: 2782402 }
+  })
+  .addEvmLog(ZENLINK_MAKER, {
+    filter: [
+      [
+        ZenlinkMakerContract.events['LogConvertPair(address,address,address,uint256,uint256,uint256)'].topic,
+        ZenlinkMakerContract.events['LogConvertStableSwap(address,address,address,uint256,uint256)'].topic,
+      ],
+    ],
+    range: { from: 2782586 }
   })
 
 processor.run(database, async (ctx) => {
@@ -122,6 +134,18 @@ async function handleEvmLog(ctx: EvmLogHandlerContext<Store>) {
           break
         case StableSwapContract.events['TokenExchange(address,uint256,uint256,uint256,uint256)'].topic:
           await handleStableSwapExchange(ctx)
+          break
+        default:
+          break
+      }
+      break
+    case ZENLINK_MAKER:
+      switch (ctx.event.args.log.topics[0]) {
+        case ZenlinkMakerContract.events['LogConvertPair(address,address,address,uint256,uint256,uint256)'].topic:
+          await handleConvertPair(ctx)
+          break
+        case ZenlinkMakerContract.events['LogConvertStableSwap(address,address,address,uint256,uint256)'].topic:
+          await handleConvertStableSwap(ctx)
           break
         default:
           break

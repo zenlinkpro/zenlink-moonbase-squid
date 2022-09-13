@@ -3,7 +3,7 @@ import { Store } from "@subsquid/typeorm-store";
 import { Big as BigDecimal } from 'big.js'
 import { FACTORY_ADDRESS, ZERO_BD } from "../consts";
 import { getOrCreateToken } from "../entities/token";
-import { getStableSwapInfo, getZenlinkInfo } from "../entities/utils";
+import { getStableSwapInfo, getZenlinkInfo, getZenlinkMakerInfo } from "../entities/utils";
 import {
   Bundle,
   Factory,
@@ -18,7 +18,8 @@ import {
   TokenDayData,
   FactoryDayData,
   ZenlinkDayInfo,
-  ZenlinkInfo
+  ZenlinkInfo,
+  ZenlinkMakerDayData
 } from "../model";
 import { findUSDPerToken } from "./pricing";
 
@@ -264,4 +265,40 @@ export async function updateZenlinkInfo(ctx: EvmLogHandlerContext<Store>): Promi
   zenlinkInfo.updatedDate = new Date(ctx.block.timestamp)
   await ctx.store.save(zenlinkInfo)
   return zenlinkInfo
+}
+
+export async function updateZenlinkMakerInfo(
+  ctx: EvmLogHandlerContext<Store>,
+  amountZLK: BigDecimal,
+  amountUSD: BigDecimal
+): Promise<ZenlinkMakerDayData> {
+  const { timestamp } = ctx.block
+  const dayID = parseInt((timestamp / 86400000).toString(), 10)
+  const dayStartTimestamp = Number(dayID) * 86400000
+  const zenlinkMakerInfo = await getZenlinkMakerInfo(ctx)
+  let zenlinkMakerDayData = await ctx.store.get(ZenlinkMakerDayData, dayID.toString())
+  if (!zenlinkMakerDayData) {
+    zenlinkMakerDayData = new ZenlinkMakerDayData({
+      id: dayID.toString(),
+      date: new Date(dayStartTimestamp),
+      dailyAmount: ZERO_BD.toString(),
+      dailyUSD: ZERO_BD.toString(),
+      info: zenlinkMakerInfo
+    })
+  }
+  zenlinkMakerDayData.dailyAmount = BigDecimal(zenlinkMakerDayData.dailyAmount)
+    .add(amountZLK)
+    .toFixed(6)
+  zenlinkMakerInfo.totalAmount = BigDecimal(zenlinkMakerInfo.totalAmount)
+    .add(amountZLK)
+    .toFixed(6)
+  zenlinkMakerDayData.dailyUSD = BigDecimal(zenlinkMakerDayData.dailyUSD)
+    .add(amountUSD)
+    .toFixed(6)
+  zenlinkMakerInfo.totalUSD = BigDecimal(zenlinkMakerInfo.totalUSD)
+    .add(amountUSD)
+    .toFixed(6)
+  await ctx.store.save(zenlinkMakerDayData)
+  await ctx.store.save(zenlinkMakerInfo)
+  return zenlinkMakerDayData
 }
