@@ -48,7 +48,7 @@ export async function updateFactoryDayData(ctx: EvmLogHandlerContext<Store>): Pr
 }
 
 export async function updatePairDayData(ctx: EvmLogHandlerContext<Store>): Promise<PairDayData> {
-  const contractAddress = ctx.event.args.address
+  const contractAddress = ctx.event.args.log.address
   const { timestamp } = ctx.block
   const dayID = parseInt((timestamp / 86400000).toString(), 10)
   const dayStartTimestamp = Number(dayID) * 86400000
@@ -78,7 +78,7 @@ export async function updatePairDayData(ctx: EvmLogHandlerContext<Store>): Promi
 }
 
 export async function updatePairHourData(ctx: EvmLogHandlerContext<Store>): Promise<PairHourData> {
-  const contractAddress = ctx.event.args.address
+  const contractAddress = ctx.event.args.log.address
   const { timestamp } = ctx.block
   const hourIndex = parseInt((timestamp / 3600000).toString(), 10)
   const hourStartUnix = Number(hourIndex) * 3600000

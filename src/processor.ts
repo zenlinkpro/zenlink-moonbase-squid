@@ -22,10 +22,10 @@ import {
 const database = new TypeormDatabase()
 const processor = new SubstrateBatchProcessor()
   .setBatchSize(100)
-  .setBlockRange({ from: 2341124 })
+  .setBlockRange({ from: 2782045 })
   .setDataSource({
     chain: CHAIN_NODE,
-    archive: lookupArchive('moonriver', { release: "FireSquid" })
+    archive: lookupArchive('moonbase', { release: "FireSquid" })
   })
   .addEvmLog(FACTORY_ADDRESS, {
     filter: [factory.events['PairCreated(address,address,address,uint256)'].topic],
@@ -54,7 +54,7 @@ const processor = new SubstrateBatchProcessor()
         StableSwapContract.events['TokenExchange(address,uint256,uint256,uint256,uint256)'].topic
       ],
     ],
-    range: { from: 2341125 }
+    range: { from: 2782402 }
   })
 
 processor.run(database, async (ctx) => {
@@ -92,13 +92,13 @@ async function isKnownPairContracts(store: Store, address: string) {
 }
 
 async function handleEvmLog(ctx: EvmLogHandlerContext<Store>) {
-  const contractAddress = ctx.event.args.address
+  const contractAddress = ctx.event.args.log.address
   switch (contractAddress) {
     case FACTORY_ADDRESS:
       await handleNewPair(ctx)
       break
     case FOUR_POOL:
-      switch (ctx.event.args.topics[0]) {
+      switch (ctx.event.args.log.topics[0]) {
         case StableSwapContract.events['NewFee(uint256,uint256)'].topic:
           await handleStableSwapNewFee(ctx)
           break
@@ -129,7 +129,7 @@ async function handleEvmLog(ctx: EvmLogHandlerContext<Store>) {
       break
     default:
       if (await isKnownPairContracts(ctx.store, contractAddress)) {
-        switch (ctx.event.args.topics[0]) {
+        switch (ctx.event.args.log.topics[0]) {
           case pair.events['Transfer(address,address,uint256)'].topic:
             await handleTransfer(ctx)
             break

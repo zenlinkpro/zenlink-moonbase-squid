@@ -38,14 +38,14 @@ async function isCompleteMint(ctx: CommonHandlerContext<Store>, mintId: string):
 }
 
 export async function handleTransfer(ctx: EvmLogHandlerContext<Store>): Promise<void> {
-  const contractAddress = ctx.event.args.address
+  const contractAddress = ctx.event.args.log.address
 
-  const data = transferEventAbi.decode(ctx.event.args)
+  const data = transferEventAbi.decode(ctx.event.args.log)
   // ignore initial transfers for first adds
   if (data.to === ADDRESS_ZERO && data.value.toBigInt() === 1000n) {
     return
   }
-  const transactionHash = ctx.event.evmTxHash
+  const transactionHash = ctx.event.extrinsic.hash
 
   // user stats
   let { from, to } = data
@@ -60,7 +60,7 @@ export async function handleTransfer(ctx: EvmLogHandlerContext<Store>): Promise<
   const value = convertTokenToDecimal(data.value.toBigInt(), 18)
 
   // get or create transaction
-  let transaction = await getTransaction(ctx, ctx.event.evmTxHash)
+  let transaction = await getTransaction(ctx, ctx.event.extrinsic.hash)
   if (!transaction) {
     transaction = new Transaction({
       id: transactionHash,
@@ -243,9 +243,9 @@ async function createLiquiditySnapShot(
 }
 
 export async function handleSync(ctx: EvmLogHandlerContext<Store>): Promise<void> {
-  const contractAddress = ctx.event.args.address
+  const contractAddress = ctx.event.args.log.address
 
-  const data = syncEventAbi.decode(ctx.event.args)
+  const data = syncEventAbi.decode(ctx.event.args.log)
   const bundle = await getBundle(ctx)
   const factory = await getFactory(ctx)
   const pair = await getPair(ctx, contractAddress)
@@ -288,8 +288,7 @@ export async function handleSync(ctx: EvmLogHandlerContext<Store>): Promise<void
     if (WHITELIST.includes(token0.id) && WHITELIST.includes(token1.id)) {
       trackedLiquidityETH = BigDecimal(pair.reserve0)
         .times(price0)
-        .plus(BigDecimal(pair.reserve1)
-        .times(price1))
+        .plus(BigDecimal(pair.reserve1).times(price1))
     }
 
     // take double value of the whitelisted token amount
@@ -325,9 +324,9 @@ export async function handleSync(ctx: EvmLogHandlerContext<Store>): Promise<void
 }
 
 export async function handleSwap(ctx: EvmLogHandlerContext<Store>): Promise<void> {
-  const contractAddress = ctx.event.args.address
+  const contractAddress = ctx.event.args.log.address
 
-  const data = SwapAbi.decode(ctx.event.args)
+  const data = SwapAbi.decode(ctx.event.args.log)
   const bundle = await getBundle(ctx)
   const factory = await getFactory(ctx)
 
@@ -420,10 +419,10 @@ export async function handleSwap(ctx: EvmLogHandlerContext<Store>): Promise<void
   factory.txCount += 1
   await ctx.store.save(factory)
 
-  let transaction = await getTransaction(ctx, ctx.event.evmTxHash)
+  let transaction = await getTransaction(ctx, ctx.event.extrinsic.hash)
   if (!transaction) {
     transaction = new Transaction({
-      id: ctx.event.evmTxHash,
+      id: ctx.event.extrinsic.hash,
       blockNumber: BigInt(ctx.block.height),
       timestamp: new Date(ctx.block.timestamp),
       mints: [],
@@ -505,14 +504,14 @@ export async function handleSwap(ctx: EvmLogHandlerContext<Store>): Promise<void
 }
 
 export async function handleMint(ctx: EvmLogHandlerContext<Store>): Promise<void> {
-  const transaction = await ctx.store.get(Transaction, ctx.event.evmTxHash)
+  const transaction = await ctx.store.get(Transaction, ctx.event.extrinsic.hash)
   // safety check
   if (!transaction) return
   const { mints } = transaction
   const mint = (await ctx.store.get(Mint, mints[mints.length - 1]))!
-  const contractAddress = ctx.event.args.address
+  const contractAddress = ctx.event.args.log.address
 
-  const data = MintAbi.decode(ctx.event.args)
+  const data = MintAbi.decode(ctx.event.args.log)
   const factory = await getFactory(ctx)
   const pair = await getPair(ctx, contractAddress)
   if (!pair) return
@@ -560,13 +559,13 @@ export async function handleMint(ctx: EvmLogHandlerContext<Store>): Promise<void
 }
 
 export async function handleBurn(ctx: EvmLogHandlerContext<Store>): Promise<void> {
-  const transaction = await ctx.store.get(Transaction, ctx.event.evmTxHash)
+  const transaction = await ctx.store.get(Transaction, ctx.event.extrinsic.hash)
   if (!transaction) return
   const { burns } = transaction
   const burn = (await ctx.store.get(Burn, burns[burns.length - 1]))!
-  const contractAddress = ctx.event.args.address
+  const contractAddress = ctx.event.args.log.address
 
-  const data = BurnAbi.decode(ctx.event.args)
+  const data = BurnAbi.decode(ctx.event.args.log)
 
   const factory = await getFactory(ctx)
 
