@@ -1,5 +1,6 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, OneToMany as OneToMany_} from "typeorm"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, OneToMany as OneToMany_, ManyToOne as ManyToOne_, Index as Index_} from "typeorm"
 import {LiquidityPosition} from "./liquidityPosition.model"
+import {VxZLKUserInfo} from "./vxZlkUserInfo.model"
 
 @Entity_()
 export class User {
@@ -18,4 +19,8 @@ export class User {
    */
   @Column_("text", {nullable: false})
   usdSwapped!: string
+
+  @Index_()
+  @ManyToOne_(() => VxZLKUserInfo, {nullable: true})
+  vxZLKUserInfo!: VxZLKUserInfo | undefined | null
 }

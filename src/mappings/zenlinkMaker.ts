@@ -7,9 +7,10 @@ import {
   ZenlinkMakerConvertPairData, 
   ZenlinkMakerConvertStableSwapData 
 } from "../model";
-import { findUSDPerToken, ZLK } from "../utils/pricing";
+import { findUSDPerToken } from "../utils/pricing";
 import { getOrCreateToken } from "../entities/token";
 import { updateZenlinkMakerInfo } from "../utils/updates";
+import { ZLK } from "../consts";
 
 export async function handleConvertPair(ctx: EvmLogHandlerContext<Store>): Promise<void> {
   const event = ZenlinkMakerContract.events[

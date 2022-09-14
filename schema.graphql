@@ -291,6 +291,7 @@ type User @entity {
   liquidityPositions: [LiquidityPosition!] @derivedFrom(field: "user")
   "BigDecimal"
   usdSwapped: String!
+  vxZLKUserInfo: VxZLKUserInfo
 }
 
 type LiquidityPosition @entity {
@@ -567,4 +568,55 @@ type ZenlinkMakerConvertStableSwapData {
   token: String!
   amount: BigInt!
   amountZLK: BigInt!
+}
+
+# vxZLK
+type VxZLK @entity {
+  id: ID!
+  symbol: String!
+  name: String!
+  decimals: Int!
+  totalSupply: String!
+
+  totalUsers: BigInt!
+  mintAmount: String!
+  redeemAmount: String!
+  feeAmount: String!
+  
+  zlk: Bytes!
+  zlkBalance: String!
+  
+  updatedAt: DateTime!
+}
+
+type VxZLKUserInfo @entity {
+  # user address
+  id: ID!
+  user: User!
+  mintAmount: String!
+  redeemRecieveAmount: String!
+  redeemFeeAmount: String!
+  timestamp: BigInt!
+  updatedAt: DateTime!
+  mints: [VxZLKMintHistory!] @derivedFrom(field: "userInfo")
+  redeems: [VxZLKRedeemHistory!] @derivedFrom(field: "userInfo")
+}
+
+type VxZLKMintHistory @entity {
+  "transaction hash"
+  id: ID!
+  userInfo: VxZLKUserInfo!
+  amount: String!
+  timestamp: BigInt!
+  updatedAt: DateTime!
+}
+
+type VxZLKRedeemHistory @entity {
+  "transaction hash"
+  id: ID!
+  userInfo: VxZLKUserInfo!
+  recieve: String!
+  fee: String!
+  timestamp: BigInt!
+  updatedAt: DateTime!
 }

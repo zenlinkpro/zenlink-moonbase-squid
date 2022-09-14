@@ -1,5 +1,5 @@
-module.exports = class Data1663037022439 {
-  name = 'Data1663037022439'
+module.exports = class Data1663137770528 {
+  name = 'Data1663137770528'
 
   async up(db) {
     await db.query(`CREATE TABLE "factory" ("id" character varying NOT NULL, "pair_count" integer NOT NULL, "total_volume_usd" text NOT NULL, "total_volume_eth" text NOT NULL, "untracked_volume_usd" text NOT NULL, "total_liquidity_usd" text NOT NULL, "total_liquidity_eth" text NOT NULL, "tx_count" integer NOT NULL, CONSTRAINT "PK_1372e5a7d114a3fa80736ba66bb" PRIMARY KEY ("id"))`)
@@ -22,7 +22,14 @@ module.exports = class Data1663037022439 {
     await db.query(`CREATE INDEX "IDX_ce435d6fc7c373d58e7aab156d" ON "pair_day_data" ("token1_id") `)
     await db.query(`CREATE TABLE "pair_hour_data" ("id" character varying NOT NULL, "hour_start_unix" numeric NOT NULL, "reserve0" text NOT NULL, "reserve1" text NOT NULL, "total_supply" text NOT NULL, "reserve_usd" text NOT NULL, "hourly_volume_token0" text NOT NULL, "hourly_volume_token1" text NOT NULL, "hourly_volume_usd" text NOT NULL, "hourly_txns" integer NOT NULL, "pair_id" character varying, CONSTRAINT "PK_ffc544bb3e72cfd3e48a8b01452" PRIMARY KEY ("id"))`)
     await db.query(`CREATE INDEX "IDX_cf50c55389e428096a68598ee3" ON "pair_hour_data" ("pair_id") `)
-    await db.query(`CREATE TABLE "user" ("id" character varying NOT NULL, "usd_swapped" text NOT NULL, CONSTRAINT "PK_cace4a159ff9f2512dd42373760" PRIMARY KEY ("id"))`)
+    await db.query(`CREATE TABLE "vx_zlk_mint_history" ("id" character varying NOT NULL, "amount" text NOT NULL, "timestamp" numeric NOT NULL, "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL, "user_info_id" character varying, CONSTRAINT "PK_36724d4377a7c7e2928160b89ca" PRIMARY KEY ("id"))`)
+    await db.query(`CREATE INDEX "IDX_7e737bd6df8fd256f2a18711f6" ON "vx_zlk_mint_history" ("user_info_id") `)
+    await db.query(`CREATE TABLE "vx_zlk_redeem_history" ("id" character varying NOT NULL, "recieve" text NOT NULL, "fee" text NOT NULL, "timestamp" numeric NOT NULL, "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL, "user_info_id" character varying, CONSTRAINT "PK_9d33b38ef2d9b594b710dbb5428" PRIMARY KEY ("id"))`)
+    await db.query(`CREATE INDEX "IDX_c73e3fa390ee876b6db3b393a0" ON "vx_zlk_redeem_history" ("user_info_id") `)
+    await db.query(`CREATE TABLE "vx_zlk_user_info" ("id" character varying NOT NULL, "mint_amount" text NOT NULL, "redeem_recieve_amount" text NOT NULL, "redeem_fee_amount" text NOT NULL, "timestamp" numeric NOT NULL, "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL, "user_id" character varying, CONSTRAINT "PK_f3304bdfc6a765dce3aad8b173f" PRIMARY KEY ("id"))`)
+    await db.query(`CREATE INDEX "IDX_4523322320b13862155e2f0e53" ON "vx_zlk_user_info" ("user_id") `)
+    await db.query(`CREATE TABLE "user" ("id" character varying NOT NULL, "usd_swapped" text NOT NULL, "vx_zlk_user_info_id" character varying, CONSTRAINT "PK_cace4a159ff9f2512dd42373760" PRIMARY KEY ("id"))`)
+    await db.query(`CREATE INDEX "IDX_e8f70c653cb350e0f4a72ce947" ON "user" ("vx_zlk_user_info_id") `)
     await db.query(`CREATE TABLE "liquidity_position" ("id" character varying NOT NULL, "liquidity_token_balance" text NOT NULL, "user_id" character varying, "pair_id" character varying, CONSTRAINT "PK_db00d963c96b3914d26abe3c3d2" PRIMARY KEY ("id"))`)
     await db.query(`CREATE INDEX "IDX_781470585a67fef4e215a59977" ON "liquidity_position" ("user_id") `)
     await db.query(`CREATE INDEX "IDX_5a626c8b8962dc01e0f8801be6" ON "liquidity_position" ("pair_id") `)
@@ -50,6 +57,11 @@ module.exports = class Data1663037022439 {
     await db.query(`CREATE TABLE "zenlink_day_info" ("id" character varying NOT NULL, "date" TIMESTAMP WITH TIME ZONE NOT NULL, "daily_volume_usd" text NOT NULL, "tvl_usd" text NOT NULL, "standard_info_id" character varying, "stable_info_id" character varying, CONSTRAINT "PK_747195cfa3811d6eea0ff6389de" PRIMARY KEY ("id"))`)
     await db.query(`CREATE INDEX "IDX_9f281ffbf4f668c1671ae24aeb" ON "zenlink_day_info" ("standard_info_id") `)
     await db.query(`CREATE INDEX "IDX_3049b8ac70203e95dfc6b42c02" ON "zenlink_day_info" ("stable_info_id") `)
+    await db.query(`CREATE TABLE "zenlink_maker_day_data" ("id" character varying NOT NULL, "date" TIMESTAMP WITH TIME ZONE NOT NULL, "daily_amount" text NOT NULL, "daily_usd" text NOT NULL, "info_id" character varying, CONSTRAINT "PK_596c8e521d2d4b5d7f7ac1e55a9" PRIMARY KEY ("id"))`)
+    await db.query(`CREATE INDEX "IDX_ae03fa28099498a18a2a26c503" ON "zenlink_maker_day_data" ("info_id") `)
+    await db.query(`CREATE TABLE "zenlink_maker_info" ("id" character varying NOT NULL, "updated_date" TIMESTAMP WITH TIME ZONE NOT NULL, "total_amount" text NOT NULL, "total_usd" text NOT NULL, CONSTRAINT "PK_cd4d27f0ac931c8f9e7977a935d" PRIMARY KEY ("id"))`)
+    await db.query(`CREATE TABLE "zenlink_maker_convert_event" ("id" character varying NOT NULL, "contract" text NOT NULL, "data" jsonb, "block" numeric NOT NULL, "timestamp" numeric NOT NULL, "transaction" bytea NOT NULL, CONSTRAINT "PK_ba8a1a44a747affcbff412e70e9" PRIMARY KEY ("id"))`)
+    await db.query(`CREATE TABLE "vx_zlk" ("id" character varying NOT NULL, "symbol" text NOT NULL, "name" text NOT NULL, "decimals" integer NOT NULL, "total_supply" text NOT NULL, "total_users" numeric NOT NULL, "mint_amount" text NOT NULL, "redeem_amount" text NOT NULL, "fee_amount" text NOT NULL, "zlk" bytea NOT NULL, "zlk_balance" text NOT NULL, "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_937c59f6485b1aced3d6355d60c" PRIMARY KEY ("id"))`)
     await db.query(`ALTER TABLE "stable_swap_event" ADD CONSTRAINT "FK_3a147c85b92441217540579be88" FOREIGN KEY ("stable_swap_id") REFERENCES "stable_swap"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
     await db.query(`ALTER TABLE "stable_swap_exchange" ADD CONSTRAINT "FK_1180a78feea28e278229de7db46" FOREIGN KEY ("stable_swap_id") REFERENCES "stable_swap"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
     await db.query(`ALTER TABLE "stable_swap_day_data" ADD CONSTRAINT "FK_648b49eb1a4f2a47f24f13bb510" FOREIGN KEY ("stable_swap_id") REFERENCES "stable_swap"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
@@ -60,6 +72,10 @@ module.exports = class Data1663037022439 {
     await db.query(`ALTER TABLE "pair_day_data" ADD CONSTRAINT "FK_88f6e19c40b47053e6e197db1c9" FOREIGN KEY ("token0_id") REFERENCES "token"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
     await db.query(`ALTER TABLE "pair_day_data" ADD CONSTRAINT "FK_ce435d6fc7c373d58e7aab156d9" FOREIGN KEY ("token1_id") REFERENCES "token"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
     await db.query(`ALTER TABLE "pair_hour_data" ADD CONSTRAINT "FK_cf50c55389e428096a68598ee33" FOREIGN KEY ("pair_id") REFERENCES "pair"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
+    await db.query(`ALTER TABLE "vx_zlk_mint_history" ADD CONSTRAINT "FK_7e737bd6df8fd256f2a18711f6e" FOREIGN KEY ("user_info_id") REFERENCES "vx_zlk_user_info"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
+    await db.query(`ALTER TABLE "vx_zlk_redeem_history" ADD CONSTRAINT "FK_c73e3fa390ee876b6db3b393a05" FOREIGN KEY ("user_info_id") REFERENCES "vx_zlk_user_info"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
+    await db.query(`ALTER TABLE "vx_zlk_user_info" ADD CONSTRAINT "FK_4523322320b13862155e2f0e53b" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
+    await db.query(`ALTER TABLE "user" ADD CONSTRAINT "FK_e8f70c653cb350e0f4a72ce947f" FOREIGN KEY ("vx_zlk_user_info_id") REFERENCES "vx_zlk_user_info"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
     await db.query(`ALTER TABLE "liquidity_position" ADD CONSTRAINT "FK_781470585a67fef4e215a599773" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
     await db.query(`ALTER TABLE "liquidity_position" ADD CONSTRAINT "FK_5a626c8b8962dc01e0f8801be61" FOREIGN KEY ("pair_id") REFERENCES "pair"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
     await db.query(`ALTER TABLE "liquidity_position_snapshot" ADD CONSTRAINT "FK_eb823fd4d5a47575039e902efa7" FOREIGN KEY ("liquidity_position_id") REFERENCES "liquidity_position"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
@@ -75,6 +91,7 @@ module.exports = class Data1663037022439 {
     await db.query(`ALTER TABLE "pair" ADD CONSTRAINT "FK_4419691fc411b8af754dfa65ce4" FOREIGN KEY ("token1_id") REFERENCES "token"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
     await db.query(`ALTER TABLE "zenlink_day_info" ADD CONSTRAINT "FK_9f281ffbf4f668c1671ae24aeb0" FOREIGN KEY ("standard_info_id") REFERENCES "factory_day_data"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
     await db.query(`ALTER TABLE "zenlink_day_info" ADD CONSTRAINT "FK_3049b8ac70203e95dfc6b42c027" FOREIGN KEY ("stable_info_id") REFERENCES "stable_swap_day_data"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
+    await db.query(`ALTER TABLE "zenlink_maker_day_data" ADD CONSTRAINT "FK_ae03fa28099498a18a2a26c503f" FOREIGN KEY ("info_id") REFERENCES "zenlink_maker_info"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
   }
 
   async down(db) {
@@ -98,7 +115,14 @@ module.exports = class Data1663037022439 {
     await db.query(`DROP INDEX "public"."IDX_ce435d6fc7c373d58e7aab156d"`)
     await db.query(`DROP TABLE "pair_hour_data"`)
     await db.query(`DROP INDEX "public"."IDX_cf50c55389e428096a68598ee3"`)
+    await db.query(`DROP TABLE "vx_zlk_mint_history"`)
+    await db.query(`DROP INDEX "public"."IDX_7e737bd6df8fd256f2a18711f6"`)
+    await db.query(`DROP TABLE "vx_zlk_redeem_history"`)
+    await db.query(`DROP INDEX "public"."IDX_c73e3fa390ee876b6db3b393a0"`)
+    await db.query(`DROP TABLE "vx_zlk_user_info"`)
+    await db.query(`DROP INDEX "public"."IDX_4523322320b13862155e2f0e53"`)
     await db.query(`DROP TABLE "user"`)
+    await db.query(`DROP INDEX "public"."IDX_e8f70c653cb350e0f4a72ce947"`)
     await db.query(`DROP TABLE "liquidity_position"`)
     await db.query(`DROP INDEX "public"."IDX_781470585a67fef4e215a59977"`)
     await db.query(`DROP INDEX "public"."IDX_5a626c8b8962dc01e0f8801be6"`)
@@ -126,6 +150,11 @@ module.exports = class Data1663037022439 {
     await db.query(`DROP TABLE "zenlink_day_info"`)
     await db.query(`DROP INDEX "public"."IDX_9f281ffbf4f668c1671ae24aeb"`)
     await db.query(`DROP INDEX "public"."IDX_3049b8ac70203e95dfc6b42c02"`)
+    await db.query(`DROP TABLE "zenlink_maker_day_data"`)
+    await db.query(`DROP INDEX "public"."IDX_ae03fa28099498a18a2a26c503"`)
+    await db.query(`DROP TABLE "zenlink_maker_info"`)
+    await db.query(`DROP TABLE "zenlink_maker_convert_event"`)
+    await db.query(`DROP TABLE "vx_zlk"`)
     await db.query(`ALTER TABLE "stable_swap_event" DROP CONSTRAINT "FK_3a147c85b92441217540579be88"`)
     await db.query(`ALTER TABLE "stable_swap_exchange" DROP CONSTRAINT "FK_1180a78feea28e278229de7db46"`)
     await db.query(`ALTER TABLE "stable_swap_day_data" DROP CONSTRAINT "FK_648b49eb1a4f2a47f24f13bb510"`)
@@ -136,6 +165,10 @@ module.exports = class Data1663037022439 {
     await db.query(`ALTER TABLE "pair_day_data" DROP CONSTRAINT "FK_88f6e19c40b47053e6e197db1c9"`)
     await db.query(`ALTER TABLE "pair_day_data" DROP CONSTRAINT "FK_ce435d6fc7c373d58e7aab156d9"`)
     await db.query(`ALTER TABLE "pair_hour_data" DROP CONSTRAINT "FK_cf50c55389e428096a68598ee33"`)
+    await db.query(`ALTER TABLE "vx_zlk_mint_history" DROP CONSTRAINT "FK_7e737bd6df8fd256f2a18711f6e"`)
+    await db.query(`ALTER TABLE "vx_zlk_redeem_history" DROP CONSTRAINT "FK_c73e3fa390ee876b6db3b393a05"`)
+    await db.query(`ALTER TABLE "vx_zlk_user_info" DROP CONSTRAINT "FK_4523322320b13862155e2f0e53b"`)
+    await db.query(`ALTER TABLE "user" DROP CONSTRAINT "FK_e8f70c653cb350e0f4a72ce947f"`)
     await db.query(`ALTER TABLE "liquidity_position" DROP CONSTRAINT "FK_781470585a67fef4e215a599773"`)
     await db.query(`ALTER TABLE "liquidity_position" DROP CONSTRAINT "FK_5a626c8b8962dc01e0f8801be61"`)
     await db.query(`ALTER TABLE "liquidity_position_snapshot" DROP CONSTRAINT "FK_eb823fd4d5a47575039e902efa7"`)
@@ -151,5 +184,6 @@ module.exports = class Data1663037022439 {
     await db.query(`ALTER TABLE "pair" DROP CONSTRAINT "FK_4419691fc411b8af754dfa65ce4"`)
     await db.query(`ALTER TABLE "zenlink_day_info" DROP CONSTRAINT "FK_9f281ffbf4f668c1671ae24aeb0"`)
     await db.query(`ALTER TABLE "zenlink_day_info" DROP CONSTRAINT "FK_3049b8ac70203e95dfc6b42c027"`)
+    await db.query(`ALTER TABLE "zenlink_maker_day_data" DROP CONSTRAINT "FK_ae03fa28099498a18a2a26c503f"`)
   }
 }

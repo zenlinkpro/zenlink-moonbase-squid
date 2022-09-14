@@ -1,12 +1,15 @@
 import { CommonHandlerContext } from "@subsquid/substrate-processor"
 import { Store } from "@subsquid/typeorm-store"
-import { FACTORY_ADDRESS, ZENLINK_MAKER, ZERO_BD } from "../consts"
+import { FACTORY_ADDRESS, ONE_BI, ZENLINK_MAKER, ZERO_BD } from "../consts"
 import {
   Bundle,
   Factory,
   LiquidityPosition,
   StableSwapInfo,
   Transaction,
+  User,
+  VxZLK,
+  VxZLKUserInfo,
   ZenlinkInfo,
   ZenlinkMakerInfo
 } from "../model"
@@ -90,4 +93,41 @@ export async function getZenlinkMakerInfo(ctx: CommonHandlerContext<Store>) {
   }
 
   return zenlinkMakerInfo
+}
+
+export async function getUser(ctx: CommonHandlerContext<Store>, id: string) {
+  let user = await ctx.store.get(User, id)
+  if (!user) {
+    user = new User({
+      id,
+      liquidityPositions: [],
+      usdSwapped: ZERO_BD.toString()
+    })
+    await ctx.store.save(user)
+  }
+
+  return user
+}
+
+export async function getvxzlkUserInfo(ctx: CommonHandlerContext<Store>, id: string, vxzlk: VxZLK) {
+  let vxzlkUserInfo = await ctx.store.get(VxZLKUserInfo, id)
+  if (!vxzlkUserInfo) {
+    const user = await getUser(ctx, id)
+    vxzlk.totalUsers += ONE_BI
+    vxzlkUserInfo = new VxZLKUserInfo({
+      id,
+      user,
+      mintAmount: ZERO_BD.toString(),
+      redeemRecieveAmount: ZERO_BD.toString(),
+      redeemFeeAmount: ZERO_BD.toString(),
+      timestamp: BigInt(ctx.block.timestamp),
+      updatedAt: new Date(ctx.block.timestamp),
+      mints: [],
+      redeems: []
+    })
+    await ctx.store.save(vxzlk)
+    await ctx.store.save(vxzlkUserInfo)
+  }
+
+  return vxzlkUserInfo
 }

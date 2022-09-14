@@ -1,7 +1,7 @@
 import { lookupArchive } from "@subsquid/archive-registry";
 import { EvmLogHandlerContext, SubstrateBatchProcessor } from "@subsquid/substrate-processor";
 import { Store, TypeormDatabase } from "@subsquid/typeorm-store";
-import { CHAIN_NODE, FACTORY_ADDRESS, FOUR_POOL, ZENLINK_MAKER } from "./consts";
+import { CHAIN_NODE, FACTORY_ADDRESS, FOUR_POOL, VXZLK, ZENLINK_MAKER } from "./consts";
 import { handleNewPair } from "./mappings/factory";
 import { Pair } from "./model";
 import { handleBurn, handleMint, handleSwap, handleSync, handleTransfer } from "./mappings/pair";
@@ -16,11 +16,12 @@ import {
   handleStopRampA
 } from "./mappings/stableSwap";
 import { handleConvertPair, handleConvertStableSwap } from "./mappings/zenlinkMaker";
+import { handleMintVXZLK, handleRedeemVXZLK } from "./mappings/vxzlk";
 import * as factory from './abis/factory'
 import * as pair from './abis/pair'
 import * as StableSwapContract from "./abis/StableSwap"
 import * as ZenlinkMakerContract from './abis/ZenlinkMaker'
-
+import * as VXZLKContract from './abis/vxZenlinkToken'
 
 const database = new TypeormDatabase()
 const processor = new SubstrateBatchProcessor()
@@ -67,6 +68,15 @@ const processor = new SubstrateBatchProcessor()
       ],
     ],
     range: { from: 2782586 }
+  })
+  .addEvmLog(VXZLK, {
+    filter: [
+      [
+        VXZLKContract.events['Deposit(address,address,uint256,uint256)'].topic,
+        VXZLKContract.events['WithdrawVXZLK(address,address,address,uint256,uint256,uint256)'].topic,
+      ],
+    ],
+    range: { from: 2782509 }
   })
 
 processor.run(database, async (ctx) => {
@@ -146,6 +156,18 @@ async function handleEvmLog(ctx: EvmLogHandlerContext<Store>) {
           break
         case ZenlinkMakerContract.events['LogConvertStableSwap(address,address,address,uint256,uint256)'].topic:
           await handleConvertStableSwap(ctx)
+          break
+        default:
+          break
+      }
+      break
+    case VXZLK:
+      switch (ctx.event.args.log.topics[0]) {
+        case VXZLKContract.events['Deposit(address,address,uint256,uint256)'].topic:
+          await handleMintVXZLK(ctx)
+          break
+        case VXZLKContract.events['WithdrawVXZLK(address,address,address,uint256,uint256,uint256)'].topic:
+          await handleRedeemVXZLK(ctx)
           break
         default:
           break

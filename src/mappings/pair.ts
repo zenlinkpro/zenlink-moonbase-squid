@@ -2,7 +2,7 @@ import { CommonHandlerContext, EvmLogHandlerContext } from "@subsquid/substrate-
 import { Store } from "@subsquid/typeorm-store";
 import { Big as BigDecimal } from 'big.js'
 import * as pairAbi from '../abis/pair'
-import { ADDRESS_ZERO, ZERO_BD } from "../consts";
+import { ADDRESS_ZERO, WHITELIST, ZERO_BD } from "../consts";
 import { getPair } from "../entities/pair";
 import { getBundle, getFactory, getPosition, getTransaction } from "../entities/utils";
 import {
@@ -18,7 +18,7 @@ import {
   User
 } from "../model";
 import { convertTokenToDecimal, createLiquidityPosition } from "../utils/helpers";
-import { findEthPerToken, getEthPriceInUSD, MINIMUM_USD_THRESHOLD_NEW_PAIRS, WHITELIST } from "../utils/pricing";
+import { findEthPerToken, getEthPriceInUSD, MINIMUM_USD_THRESHOLD_NEW_PAIRS } from "../utils/pricing";
 import { 
   updatePairDayData, 
   updatePairHourData, 
