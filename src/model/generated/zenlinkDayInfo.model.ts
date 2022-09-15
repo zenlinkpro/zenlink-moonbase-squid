@@ -1,6 +1,6 @@
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, ManyToOne as ManyToOne_, Index as Index_} from "typeorm"
 import {FactoryDayData} from "./factoryDayData.model"
-import {StableSwapDayData} from "./stableSwapDayData.model"
+import {StableDayData} from "./stableDayData.model"
 
 @Entity_()
 export class ZenlinkDayInfo {
@@ -19,8 +19,8 @@ export class ZenlinkDayInfo {
   standardInfo!: FactoryDayData
 
   @Index_()
-  @ManyToOne_(() => StableSwapDayData, {nullable: true})
-  stableInfo!: StableSwapDayData
+  @ManyToOne_(() => StableDayData, {nullable: true})
+  stableInfo!: StableDayData
 
   @Column_("text", {nullable: false})
   dailyVolumeUSD!: string

@@ -222,6 +222,8 @@ export async function updateZenlinkDayInfo(ctx: EvmLogHandlerContext<Store>): Pr
       date: new Date(dayStartTimestamp),
       tvlUSD: ZERO_BD.toString(),
       dailyVolumeUSD: ZERO_BD.toString(),
+      stableInfo: stableDayData,
+      standardInfo: factoryDayData
     })
   }
   zenlinkDayInfo.tvlUSD = BigDecimal(factoryDayData.totalLiquidityUSD)
