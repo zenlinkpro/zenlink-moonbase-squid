@@ -517,7 +517,7 @@ type ZenlinkDayInfo @entity {
   date: DateTime!
 
   standardInfo: FactoryDayData!
-  stableInfo: StableSwapDayData!
+  stableInfo: StableDayData!
 
   dailyVolumeUSD: String!
   tvlUSD: String!
@@ -619,4 +619,24 @@ type VxZLKRedeemHistory @entity {
   fee: String!
   timestamp: BigInt!
   updatedAt: DateTime!
+}
+
+type RewardDispatcher @entity {
+  id: ID!
+  token: Bytes!
+  dest: Bytes!
+  totalDispatchedAmount: String!
+  totalDispatchedUSD: String!
+  timestamp: BigInt!
+  updatedAt: DateTime!
+  dailyData: [RewardDispatcherDayData!] @derivedFrom(field: "dispatcher")
+}
+
+type RewardDispatcherDayData @entity {
+  id: ID!
+  timestamp: BigInt!
+  date: DateTime!
+  dispatcher: RewardDispatcher!
+  dailyDispatchedAmount: String!
+  dailyDispatchedUSD: String!
 }

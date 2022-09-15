@@ -1,7 +1,7 @@
 import { lookupArchive } from "@subsquid/archive-registry";
 import { EvmLogHandlerContext, SubstrateBatchProcessor } from "@subsquid/substrate-processor";
 import { Store, TypeormDatabase } from "@subsquid/typeorm-store";
-import { CHAIN_NODE, FACTORY_ADDRESS, FOUR_POOL, VXZLK, ZENLINK_MAKER } from "./consts";
+import { CHAIN_NODE, DISPATCHER, FACTORY_ADDRESS, FOUR_POOL, VXZLK, ZENLINK_MAKER } from "./consts";
 import { handleNewPair } from "./mappings/factory";
 import { Pair } from "./model";
 import { handleBurn, handleMint, handleSwap, handleSync, handleTransfer } from "./mappings/pair";
@@ -22,6 +22,8 @@ import * as pair from './abis/pair'
 import * as StableSwapContract from "./abis/StableSwap"
 import * as ZenlinkMakerContract from './abis/ZenlinkMaker'
 import * as VXZLKContract from './abis/vxZenlinkToken'
+import * as DispatcherContract from './abis/RewardDispatcher'
+import { handleDispatch } from "./mappings/rewardDispatcher";
 
 const database = new TypeormDatabase()
 const processor = new SubstrateBatchProcessor()
@@ -77,6 +79,10 @@ const processor = new SubstrateBatchProcessor()
       ],
     ],
     range: { from: 2782509 }
+  })
+  .addEvmLog(DISPATCHER, {
+    filter: [DispatcherContract.events['DispatchReward(address,address,uint256)'].topic],
+    range: { from: 2839018 }
   })
 
 processor.run(database, async (ctx) => {
@@ -168,6 +174,15 @@ async function handleEvmLog(ctx: EvmLogHandlerContext<Store>) {
           break
         case VXZLKContract.events['WithdrawVXZLK(address,address,address,uint256,uint256,uint256)'].topic:
           await handleRedeemVXZLK(ctx)
+          break
+        default:
+          break
+      }
+      break
+    case DISPATCHER:
+      switch (ctx.event.args.log.topics[0]) {
+        case DispatcherContract.events['DispatchReward(address,address,uint256)'].topic:
+          await handleDispatch(ctx)
           break
         default:
           break

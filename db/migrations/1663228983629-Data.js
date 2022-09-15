@@ -1,5 +1,5 @@
-module.exports = class Data1663137770528 {
-  name = 'Data1663137770528'
+module.exports = class Data1663228983629 {
+  name = 'Data1663228983629'
 
   async up(db) {
     await db.query(`CREATE TABLE "factory" ("id" character varying NOT NULL, "pair_count" integer NOT NULL, "total_volume_usd" text NOT NULL, "total_volume_eth" text NOT NULL, "untracked_volume_usd" text NOT NULL, "total_liquidity_usd" text NOT NULL, "total_liquidity_eth" text NOT NULL, "tx_count" integer NOT NULL, CONSTRAINT "PK_1372e5a7d114a3fa80736ba66bb" PRIMARY KEY ("id"))`)
@@ -62,6 +62,9 @@ module.exports = class Data1663137770528 {
     await db.query(`CREATE TABLE "zenlink_maker_info" ("id" character varying NOT NULL, "updated_date" TIMESTAMP WITH TIME ZONE NOT NULL, "total_amount" text NOT NULL, "total_usd" text NOT NULL, CONSTRAINT "PK_cd4d27f0ac931c8f9e7977a935d" PRIMARY KEY ("id"))`)
     await db.query(`CREATE TABLE "zenlink_maker_convert_event" ("id" character varying NOT NULL, "contract" text NOT NULL, "data" jsonb, "block" numeric NOT NULL, "timestamp" numeric NOT NULL, "transaction" bytea NOT NULL, CONSTRAINT "PK_ba8a1a44a747affcbff412e70e9" PRIMARY KEY ("id"))`)
     await db.query(`CREATE TABLE "vx_zlk" ("id" character varying NOT NULL, "symbol" text NOT NULL, "name" text NOT NULL, "decimals" integer NOT NULL, "total_supply" text NOT NULL, "total_users" numeric NOT NULL, "mint_amount" text NOT NULL, "redeem_amount" text NOT NULL, "fee_amount" text NOT NULL, "zlk" bytea NOT NULL, "zlk_balance" text NOT NULL, "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_937c59f6485b1aced3d6355d60c" PRIMARY KEY ("id"))`)
+    await db.query(`CREATE TABLE "reward_dispatcher_day_data" ("id" character varying NOT NULL, "timestamp" numeric NOT NULL, "date" TIMESTAMP WITH TIME ZONE NOT NULL, "daily_dispatched_amount" text NOT NULL, "daily_dispatched_usd" text NOT NULL, "dispatcher_id" character varying, CONSTRAINT "PK_dc6d3a9ee2687e0a79a02728c35" PRIMARY KEY ("id"))`)
+    await db.query(`CREATE INDEX "IDX_ba4d09d41e85c9b32ba72420e7" ON "reward_dispatcher_day_data" ("dispatcher_id") `)
+    await db.query(`CREATE TABLE "reward_dispatcher" ("id" character varying NOT NULL, "token" bytea NOT NULL, "dest" bytea NOT NULL, "total_dispatched_amount" text NOT NULL, "total_dispatched_usd" text NOT NULL, "timestamp" numeric NOT NULL, "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_90786188c68f8814c080437f845" PRIMARY KEY ("id"))`)
     await db.query(`ALTER TABLE "stable_swap_event" ADD CONSTRAINT "FK_3a147c85b92441217540579be88" FOREIGN KEY ("stable_swap_id") REFERENCES "stable_swap"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
     await db.query(`ALTER TABLE "stable_swap_exchange" ADD CONSTRAINT "FK_1180a78feea28e278229de7db46" FOREIGN KEY ("stable_swap_id") REFERENCES "stable_swap"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
     await db.query(`ALTER TABLE "stable_swap_day_data" ADD CONSTRAINT "FK_648b49eb1a4f2a47f24f13bb510" FOREIGN KEY ("stable_swap_id") REFERENCES "stable_swap"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
@@ -90,8 +93,9 @@ module.exports = class Data1663137770528 {
     await db.query(`ALTER TABLE "pair" ADD CONSTRAINT "FK_f74dc53460944a424b56b8f7da5" FOREIGN KEY ("token0_id") REFERENCES "token"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
     await db.query(`ALTER TABLE "pair" ADD CONSTRAINT "FK_4419691fc411b8af754dfa65ce4" FOREIGN KEY ("token1_id") REFERENCES "token"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
     await db.query(`ALTER TABLE "zenlink_day_info" ADD CONSTRAINT "FK_9f281ffbf4f668c1671ae24aeb0" FOREIGN KEY ("standard_info_id") REFERENCES "factory_day_data"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
-    await db.query(`ALTER TABLE "zenlink_day_info" ADD CONSTRAINT "FK_3049b8ac70203e95dfc6b42c027" FOREIGN KEY ("stable_info_id") REFERENCES "stable_swap_day_data"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
+    await db.query(`ALTER TABLE "zenlink_day_info" ADD CONSTRAINT "FK_3049b8ac70203e95dfc6b42c027" FOREIGN KEY ("stable_info_id") REFERENCES "stable_day_data"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
     await db.query(`ALTER TABLE "zenlink_maker_day_data" ADD CONSTRAINT "FK_ae03fa28099498a18a2a26c503f" FOREIGN KEY ("info_id") REFERENCES "zenlink_maker_info"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
+    await db.query(`ALTER TABLE "reward_dispatcher_day_data" ADD CONSTRAINT "FK_ba4d09d41e85c9b32ba72420e76" FOREIGN KEY ("dispatcher_id") REFERENCES "reward_dispatcher"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
   }
 
   async down(db) {
@@ -155,6 +159,9 @@ module.exports = class Data1663137770528 {
     await db.query(`DROP TABLE "zenlink_maker_info"`)
     await db.query(`DROP TABLE "zenlink_maker_convert_event"`)
     await db.query(`DROP TABLE "vx_zlk"`)
+    await db.query(`DROP TABLE "reward_dispatcher_day_data"`)
+    await db.query(`DROP INDEX "public"."IDX_ba4d09d41e85c9b32ba72420e7"`)
+    await db.query(`DROP TABLE "reward_dispatcher"`)
     await db.query(`ALTER TABLE "stable_swap_event" DROP CONSTRAINT "FK_3a147c85b92441217540579be88"`)
     await db.query(`ALTER TABLE "stable_swap_exchange" DROP CONSTRAINT "FK_1180a78feea28e278229de7db46"`)
     await db.query(`ALTER TABLE "stable_swap_day_data" DROP CONSTRAINT "FK_648b49eb1a4f2a47f24f13bb510"`)
@@ -185,5 +192,6 @@ module.exports = class Data1663137770528 {
     await db.query(`ALTER TABLE "zenlink_day_info" DROP CONSTRAINT "FK_9f281ffbf4f668c1671ae24aeb0"`)
     await db.query(`ALTER TABLE "zenlink_day_info" DROP CONSTRAINT "FK_3049b8ac70203e95dfc6b42c027"`)
     await db.query(`ALTER TABLE "zenlink_maker_day_data" DROP CONSTRAINT "FK_ae03fa28099498a18a2a26c503f"`)
+    await db.query(`ALTER TABLE "reward_dispatcher_day_data" DROP CONSTRAINT "FK_ba4d09d41e85c9b32ba72420e76"`)
   }
 }
