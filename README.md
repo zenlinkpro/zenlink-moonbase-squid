@@ -109,7 +109,13 @@ alias sqd="npx sqd"
 sqd auth --key <your_deployment_key>
 
 # 3. Deploy your squid
-sqd squid:release <squid_name>@<squid_version> --source <github_url>\#<commit_hash>
+sqd squid release <squid_name>@<squid_version> [--source <github_url>\#<commit_hash>]
+
+# 4. Update your squid
+sqd squid update <squid_name>@<squid_version> -v [--source <github_url>\#<commit_hash>] [--hardReset]
+
+# 5. Promote to production endpoint
+sqd squid:prod <squid_name>@<squid_version> # URL: https://squid.subsquid.io/<squid name>/graphql
 ```
 
 ## Query examples
