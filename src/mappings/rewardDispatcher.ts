@@ -6,6 +6,7 @@ import { getOrCreateToken } from "../entities/token";
 import { RewardDispatcher, RewardDispatcherDayData } from "../model";
 import * as RewardDispatcherContract from '../abis/RewardDispatcher'
 import { findUSDPerToken } from "../utils/pricing";
+import { getEvmLogArgs } from "../utils/helpers";
 
 export async function handleDispatch(ctx: EvmLogHandlerContext<Store>): Promise<void> {
   let dispatcher = await ctx.store.get(RewardDispatcher, DISPATCHER)
@@ -40,7 +41,7 @@ export async function handleDispatch(ctx: EvmLogHandlerContext<Store>): Promise<
   }
 
   const event = RewardDispatcherContract.events['DispatchReward(address,address,uint256)']
-    .decode(ctx.event.args.log)
+    .decode(getEvmLogArgs(ctx))
   const { amount } = event
 
   const zlk = await getOrCreateToken(ctx, ZLK)

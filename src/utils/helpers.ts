@@ -1,3 +1,5 @@
+import { EvmLogHandlerContext } from '@subsquid/substrate-processor'
+import { Store } from '@subsquid/typeorm-store'
 import { Big as BigDecimal } from 'big.js'
 import { ZERO_BD } from '../consts'
 import { LiquidityPosition, Pair, User } from '../model'
@@ -20,4 +22,9 @@ export function createLiquidityPosition(data: LiquidityPositionData): LiquidityP
     pair,
     user,
   })
+}
+
+export function getEvmLogArgs(ctx: EvmLogHandlerContext<Store>): any {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  return getEvmLogArgs(ctx) || ctx.event.args
 }

@@ -12,6 +12,7 @@ export const FOUR_POOL = '0x36aa49803aF6c5b2b2Fe8488D78AbB334de52320'.toLowerCas
 export const ZENLINK_MAKER = '0x59EBBbC1ab1d13a21e5fd84028f04a21e566B63E'.toLowerCase()
 export const VXZLK = '0xb38188fEDff30bEc23aEf5C691AB647756771fF1'.toLowerCase()
 export const DISPATCHER = '0xaa3B362b0aE5c99C2E2DA11CC8F3A3fAbd5f6c2D'.toLowerCase()
+export const GAUGE = '0xA12e750486A6edfA30AEaF168AED6689E2c09913'.toLowerCase()
 
 export const WNATIVE = '0x674421E9567653EE76e96fEEA3B2B2966d000Dbd'.toLowerCase()
 export const USDC = '0x1E80A824Ed280c5Ee783D76fdcB634a67C95Edb7'.toLowerCase()

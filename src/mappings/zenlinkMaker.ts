@@ -11,16 +11,17 @@ import { findUSDPerToken } from "../utils/pricing";
 import { getOrCreateToken } from "../entities/token";
 import { updateZenlinkMakerInfo } from "../utils/updates";
 import { ZLK } from "../consts";
+import { getEvmLogArgs } from "../utils/helpers";
 
 export async function handleConvertPair(ctx: EvmLogHandlerContext<Store>): Promise<void> {
   const event = ZenlinkMakerContract.events[
     'LogConvertPair(address,address,address,uint256,uint256,uint256)'
-  ].decode(ctx.event.args.log)
+  ].decode(getEvmLogArgs(ctx))
   const { sender, token0, token1, amount0, amount1, amountZLK } = event
 
   const log = new ZenlinkMakerConvertEvent({
     id: `convert_pair-${ctx.event.evmTxHash}-${ctx.event.indexInBlock}`,
-    contract: ctx.event.args.log.address,
+    contract: getEvmLogArgs(ctx).address,
     data: new ZenlinkMakerConvertPairData({
       sender,
       token0,
@@ -46,12 +47,12 @@ export async function handleConvertPair(ctx: EvmLogHandlerContext<Store>): Promi
 export async function handleConvertStableSwap(ctx: EvmLogHandlerContext<Store>): Promise<void> {
   const event = ZenlinkMakerContract.events[
     'LogConvertStableSwap(address,address,address,uint256,uint256)'
-  ].decode(ctx.event.args.log)
+  ].decode(getEvmLogArgs(ctx))
   const { sender, token, pool, amount, amountZLK } = event
 
   const log = new ZenlinkMakerConvertEvent({
     id: `convert_stable_swap-${ctx.event.evmTxHash}-${ctx.event.indexInBlock}`,
-    contract: ctx.event.args.log.address,
+    contract: getEvmLogArgs(ctx).address,
     data: new ZenlinkMakerConvertStableSwapData({
       sender,
       token,

@@ -640,3 +640,41 @@ type RewardDispatcherDayData @entity {
   dailyDispatchedAmount: String!
   dailyDispatchedUSD: String!
 }
+
+type Gauge @entity {
+  id: ID!
+  farming: Bytes!
+  voteToken: Bytes!
+  voteSetWindow: BigInt!
+  voteDuration: BigInt!
+  nextVotePeriodID: Int!
+  timestamp: BigInt!
+  updatedAt: DateTime!
+  periodStates: [GaugePeriodState!] @derivedFrom(field: "gauge")
+}
+
+type GaugePeriodState @entity {
+  # periodId
+  id: ID!
+  gauge: Gauge!
+  totalAmount: BigInt!
+  totalScore: BigInt!
+  timestamp: BigInt!
+  updatedAt: DateTime!
+  poolStates: [GaugePoolState!] @derivedFrom(field: "periodState")
+}
+
+type GaugePoolState @entity {
+  # periodId-poolId
+  id: ID!
+  periodState: GaugePeriodState!
+  periodId: Int!
+  poolId: Int!
+  inherit: Boolean!
+  resetVotable: Boolean!
+  votable: Boolean!
+  score: BigInt!
+  totalAmount: BigInt!
+  timestamp: BigInt!
+  updatedAt: DateTime!
+}

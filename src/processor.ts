@@ -17,13 +17,14 @@ import {
 } from "./mappings/stableSwap";
 import { handleConvertPair, handleConvertStableSwap } from "./mappings/zenlinkMaker";
 import { handleMintVXZLK, handleRedeemVXZLK } from "./mappings/vxzlk";
+import { handleDispatch } from "./mappings/rewardDispatcher";
+import { getEvmLogArgs } from "./utils/helpers";
 import * as factory from './abis/factory'
 import * as pair from './abis/pair'
 import * as StableSwapContract from "./abis/StableSwap"
 import * as ZenlinkMakerContract from './abis/ZenlinkMaker'
 import * as VXZLKContract from './abis/vxZenlinkToken'
 import * as DispatcherContract from './abis/RewardDispatcher'
-import { handleDispatch } from "./mappings/rewardDispatcher";
 
 const database = new TypeormDatabase()
 const processor = new SubstrateBatchProcessor()
@@ -88,10 +89,8 @@ const processor = new SubstrateBatchProcessor()
 processor.run(database, async (ctx) => {
   for (const block of ctx.blocks) {
     for (const item of block.items) {
-      if (item.kind === 'event') {
-        if (item.name === 'EVM.Log') {
-          await handleEvmLog({ ...ctx, block: block.header, event: item.event })
-        }
+      if (item.kind === 'event' && item.name === 'EVM.Log') {
+        await handleEvmLog({ ...ctx, block: block.header, event: item.event })
       }
     }
   }
@@ -120,13 +119,15 @@ async function isKnownPairContracts(store: Store, address: string) {
 }
 
 async function handleEvmLog(ctx: EvmLogHandlerContext<Store>) {
-  const contractAddress = ctx.event.args.log.address
+  const contractAddress = getEvmLogArgs(ctx).address
+  const firstTopic = getEvmLogArgs(ctx).topics[0]
+
   switch (contractAddress) {
     case FACTORY_ADDRESS:
       await handleNewPair(ctx)
       break
     case FOUR_POOL:
-      switch (ctx.event.args.log.topics[0]) {
+      switch (firstTopic) {
         case StableSwapContract.events['NewFee(uint256,uint256)'].topic:
           await handleStableSwapNewFee(ctx)
           break
@@ -156,7 +157,7 @@ async function handleEvmLog(ctx: EvmLogHandlerContext<Store>) {
       }
       break
     case ZENLINK_MAKER:
-      switch (ctx.event.args.log.topics[0]) {
+      switch (firstTopic) {
         case ZenlinkMakerContract.events['LogConvertPair(address,address,address,uint256,uint256,uint256)'].topic:
           await handleConvertPair(ctx)
           break
@@ -168,7 +169,7 @@ async function handleEvmLog(ctx: EvmLogHandlerContext<Store>) {
       }
       break
     case VXZLK:
-      switch (ctx.event.args.log.topics[0]) {
+      switch (firstTopic) {
         case VXZLKContract.events['Deposit(address,address,uint256,uint256)'].topic:
           await handleMintVXZLK(ctx)
           break
@@ -180,7 +181,7 @@ async function handleEvmLog(ctx: EvmLogHandlerContext<Store>) {
       }
       break
     case DISPATCHER:
-      switch (ctx.event.args.log.topics[0]) {
+      switch (firstTopic) {
         case DispatcherContract.events['DispatchReward(address,address,uint256)'].topic:
           await handleDispatch(ctx)
           break
@@ -190,7 +191,7 @@ async function handleEvmLog(ctx: EvmLogHandlerContext<Store>) {
       break
     default:
       if (await isKnownPairContracts(ctx.store, contractAddress)) {
-        switch (ctx.event.args.log.topics[0]) {
+        switch (firstTopic) {
           case pair.events['Transfer(address,address,uint256)'].topic:
             await handleTransfer(ctx)
             break

@@ -10,7 +10,7 @@ import { getvxzlkUserInfo } from "../entities/utils";
 export async function handleMintVXZLK(ctx: EvmLogHandlerContext<Store>): Promise<void> {
   const vxzlk = await getOrCreateVXZLK(ctx)
   const event = VXZLKContract.events['Deposit(address,address,uint256,uint256)']
-    .decode(ctx.event.args.log)
+    .decode(getEvmLogArgs(ctx))
   const { owner, shares } = event
   const mintAmount = BigDecimal(shares.toString()).div(10 ** vxzlk.decimals)
 
@@ -39,7 +39,7 @@ export async function handleRedeemVXZLK(ctx: EvmLogHandlerContext<Store>): Promi
   const vxzlk = await getOrCreateVXZLK(ctx)
   const zlk = await getOrCreateToken(ctx, ZLK)
   const event = VXZLKContract.events['WithdrawVXZLK(address,address,address,uint256,uint256,uint256)']
-    .decode(ctx.event.args.log)
+    .decode(getEvmLogArgs(ctx))
   const { receiver, owner, assets, fee } = event
   const redeemAmount = BigDecimal(assets.toString()).div(10 ** zlk.decimals)
   const feeAmount = BigDecimal(fee.toString()).div(10 ** zlk.decimals)
