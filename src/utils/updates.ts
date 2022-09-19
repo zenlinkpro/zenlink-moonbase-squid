@@ -21,6 +21,7 @@ import {
   ZenlinkInfo,
   ZenlinkMakerDayData
 } from "../model";
+import { getEvmLogArgs } from "./helpers";
 import { findUSDPerToken } from "./pricing";
 
 export async function updateFactoryDayData(ctx: EvmLogHandlerContext<Store>): Promise<FactoryDayData> {

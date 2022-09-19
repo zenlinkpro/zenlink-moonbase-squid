@@ -1,10 +1,9 @@
-import { CommonHandlerContext, decodeHex } from "@subsquid/substrate-processor"
+import { CommonHandlerContext } from "@subsquid/substrate-processor"
 import { Store } from "@subsquid/typeorm-store"
-import { FACTORY_ADDRESS, GAUGE, ONE_BI, ZENLINK_MAKER, ZERO_BD } from "../consts"
+import { FACTORY_ADDRESS, ONE_BI, ZENLINK_MAKER, ZERO_BD } from "../consts"
 import {
   Bundle,
   Factory,
-  Gauge,
   LiquidityPosition,
   StableSwapInfo,
   Transaction,
@@ -14,7 +13,6 @@ import {
   ZenlinkInfo,
   ZenlinkMakerInfo
 } from "../model"
-import * as GAUGE_CONTRACT from '../abis/Gauge'
 
 export async function getTransaction(ctx: CommonHandlerContext<Store>, id: string) {
   const tx = await ctx.store.get(Transaction, id)
@@ -132,25 +130,4 @@ export async function getvxzlkUserInfo(ctx: CommonHandlerContext<Store>, id: str
   }
 
   return vxzlkUserInfo
-}
-
-export async function getGauge(ctx: CommonHandlerContext<Store>) {
-  let gauge = await ctx.store.get(Gauge, GAUGE)
-  if (!gauge) {
-    const gaugeContract = new GAUGE_CONTRACT.Contract(ctx, GAUGE)
-    gauge = new Gauge({
-      id: GAUGE,
-      farming: decodeHex(await gaugeContract.farming()),
-      voteToken: decodeHex(await gaugeContract.voteToken()),
-      voteSetWindow: (await gaugeContract.voteSetWindow()).toBigInt(),
-      voteDuration: (await gaugeContract.voteDuration()).toBigInt(),
-      nextVotePeriodID: 1,
-      timestamp: BigInt(ctx.block.timestamp),
-      updatedAt: new Date(ctx.block.timestamp),
-      periodStates: []
-    })
-    await ctx.store.save(gauge)
-  }
-
-  return gauge
 }

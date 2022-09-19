@@ -650,6 +650,7 @@ type Gauge @entity {
   nextVotePeriodID: Int!
   timestamp: BigInt!
   updatedAt: DateTime!
+  stablePoolIds: [Int!]
   periodStates: [GaugePeriodState!] @derivedFrom(field: "gauge")
 }
 
@@ -657,11 +658,13 @@ type GaugePeriodState @entity {
   # periodId
   id: ID!
   gauge: Gauge!
+  start: BigInt!
+  end: BigInt!
   totalAmount: BigInt!
   totalScore: BigInt!
   timestamp: BigInt!
   updatedAt: DateTime!
-  poolStates: [GaugePoolState!] @derivedFrom(field: "periodState")
+  allPoolStates: [GaugePoolState!] @derivedFrom(field: "periodState")
 }
 
 type GaugePoolState @entity {

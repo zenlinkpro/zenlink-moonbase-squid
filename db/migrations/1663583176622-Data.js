@@ -1,5 +1,5 @@
-module.exports = class Data1663228983629 {
-  name = 'Data1663228983629'
+module.exports = class Data1663583176622 {
+  name = 'Data1663583176622'
 
   async up(db) {
     await db.query(`CREATE TABLE "factory" ("id" character varying NOT NULL, "pair_count" integer NOT NULL, "total_volume_usd" text NOT NULL, "total_volume_eth" text NOT NULL, "untracked_volume_usd" text NOT NULL, "total_liquidity_usd" text NOT NULL, "total_liquidity_eth" text NOT NULL, "tx_count" integer NOT NULL, CONSTRAINT "PK_1372e5a7d114a3fa80736ba66bb" PRIMARY KEY ("id"))`)
@@ -65,6 +65,11 @@ module.exports = class Data1663228983629 {
     await db.query(`CREATE TABLE "reward_dispatcher_day_data" ("id" character varying NOT NULL, "timestamp" numeric NOT NULL, "date" TIMESTAMP WITH TIME ZONE NOT NULL, "daily_dispatched_amount" text NOT NULL, "daily_dispatched_usd" text NOT NULL, "dispatcher_id" character varying, CONSTRAINT "PK_dc6d3a9ee2687e0a79a02728c35" PRIMARY KEY ("id"))`)
     await db.query(`CREATE INDEX "IDX_ba4d09d41e85c9b32ba72420e7" ON "reward_dispatcher_day_data" ("dispatcher_id") `)
     await db.query(`CREATE TABLE "reward_dispatcher" ("id" character varying NOT NULL, "token" bytea NOT NULL, "dest" bytea NOT NULL, "total_dispatched_amount" text NOT NULL, "total_dispatched_usd" text NOT NULL, "timestamp" numeric NOT NULL, "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_90786188c68f8814c080437f845" PRIMARY KEY ("id"))`)
+    await db.query(`CREATE TABLE "gauge_pool_state" ("id" character varying NOT NULL, "period_id" integer NOT NULL, "pool_id" integer NOT NULL, "inherit" boolean NOT NULL, "reset_votable" boolean NOT NULL, "votable" boolean NOT NULL, "score" numeric NOT NULL, "total_amount" numeric NOT NULL, "timestamp" numeric NOT NULL, "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL, "period_state_id" character varying, CONSTRAINT "PK_551b852a8afc7464715380a82db" PRIMARY KEY ("id"))`)
+    await db.query(`CREATE INDEX "IDX_f298a7047a3fd3875f7d222ca7" ON "gauge_pool_state" ("period_state_id") `)
+    await db.query(`CREATE TABLE "gauge_period_state" ("id" character varying NOT NULL, "start" numeric NOT NULL, "end" numeric NOT NULL, "total_amount" numeric NOT NULL, "total_score" numeric NOT NULL, "timestamp" numeric NOT NULL, "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL, "gauge_id" character varying, CONSTRAINT "PK_8b87e9e2d639932f0f284c65777" PRIMARY KEY ("id"))`)
+    await db.query(`CREATE INDEX "IDX_2a1fda5816792e5010480aa7af" ON "gauge_period_state" ("gauge_id") `)
+    await db.query(`CREATE TABLE "gauge" ("id" character varying NOT NULL, "farming" bytea NOT NULL, "vote_token" bytea NOT NULL, "vote_set_window" numeric NOT NULL, "vote_duration" numeric NOT NULL, "next_vote_period_id" integer NOT NULL, "timestamp" numeric NOT NULL, "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL, "stable_pool_ids" integer array, CONSTRAINT "PK_75e58a144be730912dd228f9793" PRIMARY KEY ("id"))`)
     await db.query(`ALTER TABLE "stable_swap_event" ADD CONSTRAINT "FK_3a147c85b92441217540579be88" FOREIGN KEY ("stable_swap_id") REFERENCES "stable_swap"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
     await db.query(`ALTER TABLE "stable_swap_exchange" ADD CONSTRAINT "FK_1180a78feea28e278229de7db46" FOREIGN KEY ("stable_swap_id") REFERENCES "stable_swap"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
     await db.query(`ALTER TABLE "stable_swap_day_data" ADD CONSTRAINT "FK_648b49eb1a4f2a47f24f13bb510" FOREIGN KEY ("stable_swap_id") REFERENCES "stable_swap"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
@@ -96,6 +101,8 @@ module.exports = class Data1663228983629 {
     await db.query(`ALTER TABLE "zenlink_day_info" ADD CONSTRAINT "FK_3049b8ac70203e95dfc6b42c027" FOREIGN KEY ("stable_info_id") REFERENCES "stable_day_data"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
     await db.query(`ALTER TABLE "zenlink_maker_day_data" ADD CONSTRAINT "FK_ae03fa28099498a18a2a26c503f" FOREIGN KEY ("info_id") REFERENCES "zenlink_maker_info"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
     await db.query(`ALTER TABLE "reward_dispatcher_day_data" ADD CONSTRAINT "FK_ba4d09d41e85c9b32ba72420e76" FOREIGN KEY ("dispatcher_id") REFERENCES "reward_dispatcher"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
+    await db.query(`ALTER TABLE "gauge_pool_state" ADD CONSTRAINT "FK_f298a7047a3fd3875f7d222ca7f" FOREIGN KEY ("period_state_id") REFERENCES "gauge_period_state"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
+    await db.query(`ALTER TABLE "gauge_period_state" ADD CONSTRAINT "FK_2a1fda5816792e5010480aa7afa" FOREIGN KEY ("gauge_id") REFERENCES "gauge"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
   }
 
   async down(db) {
@@ -162,6 +169,11 @@ module.exports = class Data1663228983629 {
     await db.query(`DROP TABLE "reward_dispatcher_day_data"`)
     await db.query(`DROP INDEX "public"."IDX_ba4d09d41e85c9b32ba72420e7"`)
     await db.query(`DROP TABLE "reward_dispatcher"`)
+    await db.query(`DROP TABLE "gauge_pool_state"`)
+    await db.query(`DROP INDEX "public"."IDX_f298a7047a3fd3875f7d222ca7"`)
+    await db.query(`DROP TABLE "gauge_period_state"`)
+    await db.query(`DROP INDEX "public"."IDX_2a1fda5816792e5010480aa7af"`)
+    await db.query(`DROP TABLE "gauge"`)
     await db.query(`ALTER TABLE "stable_swap_event" DROP CONSTRAINT "FK_3a147c85b92441217540579be88"`)
     await db.query(`ALTER TABLE "stable_swap_exchange" DROP CONSTRAINT "FK_1180a78feea28e278229de7db46"`)
     await db.query(`ALTER TABLE "stable_swap_day_data" DROP CONSTRAINT "FK_648b49eb1a4f2a47f24f13bb510"`)
@@ -193,5 +205,7 @@ module.exports = class Data1663228983629 {
     await db.query(`ALTER TABLE "zenlink_day_info" DROP CONSTRAINT "FK_3049b8ac70203e95dfc6b42c027"`)
     await db.query(`ALTER TABLE "zenlink_maker_day_data" DROP CONSTRAINT "FK_ae03fa28099498a18a2a26c503f"`)
     await db.query(`ALTER TABLE "reward_dispatcher_day_data" DROP CONSTRAINT "FK_ba4d09d41e85c9b32ba72420e76"`)
+    await db.query(`ALTER TABLE "gauge_pool_state" DROP CONSTRAINT "FK_f298a7047a3fd3875f7d222ca7f"`)
+    await db.query(`ALTER TABLE "gauge_period_state" DROP CONSTRAINT "FK_2a1fda5816792e5010480aa7afa"`)
   }
 }

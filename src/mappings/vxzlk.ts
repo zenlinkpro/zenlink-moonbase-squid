@@ -6,6 +6,7 @@ import * as VXZLKContract from "../abis/vxZenlinkToken"
 import { VxZLKMintHistory, VxZLKRedeemHistory } from "../model";
 import { ZLK } from "../consts";
 import { getvxzlkUserInfo } from "../entities/utils";
+import { getEvmLogArgs } from "../utils/helpers";
 
 export async function handleMintVXZLK(ctx: EvmLogHandlerContext<Store>): Promise<void> {
   const vxzlk = await getOrCreateVXZLK(ctx)
