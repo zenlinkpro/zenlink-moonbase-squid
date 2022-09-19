@@ -24,7 +24,7 @@ export function createLiquidityPosition(data: LiquidityPositionData): LiquidityP
   })
 }
 
-export function getEvmLogArgs(ctx: EvmLogHandlerContext<Store>): any {
+export function getEvmLogArgs(ctx: EvmLogHandlerContext<Store>) {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-  return getEvmLogArgs(ctx) || ctx.event.args
+  return ctx.event.args.log || ctx.event.args
 }
