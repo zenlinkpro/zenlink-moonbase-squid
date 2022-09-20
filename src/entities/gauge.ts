@@ -36,18 +36,21 @@ export async function getGaugePeriodState(
   if (!gaugePeriodState) {
     const gauge = await getGauge(ctx)
     gauge.nextVotePeriodID++
-    let start = args?.start
-    let end = args?.end
-
-    if (periodId === '0' && !args) {
+    gauge.timestamp = BigInt(ctx.block.timestamp)
+    gauge.updatedAt = new Date(ctx.block.timestamp)
+    
+    let start = BigNumber.from(0)
+    let end = BigNumber.from(0)
+    if (!args) {
       const gaugeContract = new GAUGE_CONTRACT.Contract(ctx, GAUGE)
-      ;[start, end] = await gaugeContract.votePeriods(BigNumber.from(0))
+      ;[start, end] = await gaugeContract.votePeriods(BigNumber.from(periodId))
     }
+
     gaugePeriodState = new GaugePeriodState({
       id: periodId,
       gauge,
-      start: start?.toBigInt() ?? ZERO_BI,
-      end: end?.toBigInt() ?? ZERO_BI,
+      start: args?.start?.toBigInt() ?? start?.toBigInt() ?? ZERO_BI,
+      end: args?.end.toBigInt() ?? end?.toBigInt() ?? ZERO_BI,
       totalAmount: ZERO_BI,
       totalScore: ZERO_BI,
       timestamp: BigInt(ctx.block.timestamp),
@@ -58,6 +61,11 @@ export async function getGaugePeriodState(
     await ctx.store.save(gaugePeriodState)
   }
 
+  if (args && gaugePeriodState.start === ZERO_BI) {
+    gaugePeriodState.start = args.start.toBigInt()
+    gaugePeriodState.end = args.end.toBigInt()
+    await ctx.store.save(gaugePeriodState) 
+  }
   return gaugePeriodState
 }
 

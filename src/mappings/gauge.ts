@@ -43,36 +43,46 @@ export async function handleSetVotablePools(ctx: EvmLogHandlerContext<Store>): P
   const event = GaugeContract.events['SetVotablePools(uint256,uint256[])']
     .decode(getEvmLogArgs(ctx))
   const { period, pools } = event
+  const gaugePeriodState = await getGaugePeriodState(ctx, period.toString())
   for (const poolId of pools) {
     const gaugePoolState = await getGaugePoolState(
       ctx,
       period.toString(),
       poolId.toString()
     )
+    if (!gaugePoolState.votable) {
+      gaugePeriodState.totalScore += gaugePoolState.score
+    }
     gaugePoolState.votable = true
     gaugePoolState.resetVotable = true
     gaugePoolState.timestamp = BigInt(ctx.block.timestamp)
     gaugePoolState.updatedAt = new Date(ctx.block.timestamp)
     await ctx.store.save(gaugePoolState)
   }
+  await ctx.store.save(gaugePeriodState)
 }
 
 export async function handleSetNonVotablePools(ctx: EvmLogHandlerContext<Store>): Promise<void> {
   const event = GaugeContract.events['SetNonVotablePools(uint256,uint256[])']
     .decode(getEvmLogArgs(ctx))
   const { period, pools } = event
+  const gaugePeriodState = await getGaugePeriodState(ctx, period.toString())
   for (const poolId of pools) {
     const gaugePoolState = await getGaugePoolState(
       ctx,
       period.toString(),
       poolId.toString()
     )
+    if (gaugePoolState.votable) {
+      gaugePeriodState.totalScore -= gaugePoolState.score
+    }
     gaugePoolState.votable = false
     gaugePoolState.resetVotable = true
     gaugePoolState.timestamp = BigInt(ctx.block.timestamp)
     gaugePoolState.updatedAt = new Date(ctx.block.timestamp)
     await ctx.store.save(gaugePoolState)
   }
+  await ctx.store.save(gaugePeriodState)
 }
 
 export async function handleInheritPool(ctx: EvmLogHandlerContext<Store>): Promise<void> {
@@ -88,15 +98,19 @@ export async function handleInheritPool(ctx: EvmLogHandlerContext<Store>): Promi
     poolId.toString()
   )
   gaugePoolState.inherit = true
-  gaugePoolState.votable = votable
+  if (!gaugePoolState.resetVotable) {
+    gaugePoolState.votable = votable
+  }
   gaugePoolState.totalAmount = amount.toBigInt()
   gaugePoolState.score = amount.toBigInt()
   gaugePoolState.timestamp = BigInt(ctx.block.timestamp)
   gaugePoolState.updatedAt = new Date(ctx.block.timestamp)
   await ctx.store.save(gaugePoolState)
 
+  if (!gaugePoolState.resetVotable && votable) {
+    gaugePeriodState.totalScore += amount.toBigInt()
+  }
   gaugePeriodState.totalAmount += amount.toBigInt()
-  gaugePeriodState.totalScore += amount.toBigInt()
   gaugePeriodState.timestamp = BigInt(ctx.block.timestamp)
   gaugePeriodState.updatedAt = new Date(ctx.block.timestamp)
   await ctx.store.save(gaugePeriodState)
@@ -113,7 +127,7 @@ export async function handleUpdatePoolHistory(ctx: EvmLogHandlerContext<Store>):
     lastPeriod.toString(),
     poolId.toString()
   )
-  for (let i = lastPeriod.toNumber(); i < needUpdatePool.toNumber(); i++) {
+  for (let i = needUpdatePool.toNumber(); i > lastPeriod.toNumber(); i--) {
     const gaugePeriodState = await getGaugePeriodState(ctx, i.toString())
     const gaugePoolState = await getGaugePoolState(
       ctx,
@@ -122,15 +136,19 @@ export async function handleUpdatePoolHistory(ctx: EvmLogHandlerContext<Store>):
     )
     if (!gaugePoolState.inherit) {
       gaugePoolState.inherit = true
-      gaugePoolState.votable = lastGaugePoolState.votable
+      if (!gaugePoolState.resetVotable) {
+        gaugePoolState.votable = lastGaugePoolState.votable
+      }
       gaugePoolState.score = lastPeriodAmount.toBigInt()
       gaugePoolState.totalAmount = lastPeriodAmount.toBigInt()
       gaugePoolState.timestamp = BigInt(ctx.block.timestamp)
       gaugePoolState.updatedAt = new Date(ctx.block.timestamp)
       await ctx.store.save(gaugePoolState)
 
+      if (!gaugePoolState.resetVotable && lastGaugePoolState.votable) {
+        gaugePeriodState.totalScore += lastPeriodAmount.toBigInt()
+      }
       gaugePeriodState.totalAmount += lastPeriodAmount.toBigInt()
-      gaugePeriodState.totalScore += lastPeriodAmount.toBigInt()
       gaugePeriodState.timestamp = BigInt(ctx.block.timestamp)
       gaugePeriodState.updatedAt = new Date(ctx.block.timestamp)
       await ctx.store.save(gaugePeriodState)
@@ -194,7 +212,9 @@ export async function handleCancelVote(ctx: EvmLogHandlerContext<Store>): Promis
     period.toString(),
     poolId.toString()
   )
-  gaugePeriodState.totalScore -= gaugePoolState.score
+  if (gaugePoolState.votable) {
+    gaugePeriodState.totalScore -= gaugePoolState.score
+  }
   gaugePeriodState.totalAmount -= gaugePoolState.totalAmount
 
   gaugePoolState.score = poolPeriodScore.toBigInt()
@@ -203,7 +223,9 @@ export async function handleCancelVote(ctx: EvmLogHandlerContext<Store>): Promis
   gaugePoolState.updatedAt = new Date(ctx.block.timestamp)
   await ctx.store.save(gaugePoolState)
 
-  gaugePeriodState.totalScore += poolPeriodScore.toBigInt()
+  if (gaugePoolState.votable) {
+    gaugePeriodState.totalScore += poolPeriodScore.toBigInt()
+  }
   gaugePeriodState.totalAmount += poolPeriodAmount.toBigInt()
   gaugePeriodState.timestamp = BigInt(ctx.block.timestamp)
   gaugePeriodState.updatedAt = new Date(ctx.block.timestamp)
