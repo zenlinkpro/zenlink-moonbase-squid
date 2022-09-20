@@ -36,11 +36,18 @@ export async function getGaugePeriodState(
   if (!gaugePeriodState) {
     const gauge = await getGauge(ctx)
     gauge.nextVotePeriodID++
+    let start = args?.start
+    let end = args?.end
+
+    if (periodId === '0' && !args) {
+      const gaugeContract = new GAUGE_CONTRACT.Contract(ctx, GAUGE)
+      ;[start, end] = await gaugeContract.votePeriods(BigNumber.from(0))
+    }
     gaugePeriodState = new GaugePeriodState({
       id: periodId,
       gauge,
-      start: args?.start.toBigInt() ?? ZERO_BI,
-      end: args?.end.toBigInt() ?? ZERO_BI,
+      start: start?.toBigInt() ?? ZERO_BI,
+      end: end?.toBigInt() ?? ZERO_BI,
       totalAmount: ZERO_BI,
       totalScore: ZERO_BI,
       timestamp: BigInt(ctx.block.timestamp),
@@ -58,7 +65,7 @@ export async function getGaugePoolState(
   ctx: CommonHandlerContext<Store>,
   periodId: string,
   poolId: string,
-  args?: { 
+  args?: {
     votable?: boolean,
     resetVotable?: boolean,
     inherit?: boolean,
