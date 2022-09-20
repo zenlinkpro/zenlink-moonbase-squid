@@ -11,7 +11,7 @@
     "warnOnUnsupportedTypeScriptVersion": false // TODO: remove after updating to eslint 8
   },
   "rules": {
-    
+    "no-constant-condition": "off",
     "import/extensions": "off",
     "no-plusplus": "off",
     // https://basarat.gitbooks.io/typescript/docs/tips/defaultIsBad.html
@@ -41,11 +41,15 @@
     "prettier/prettier": "off",
     "@typescript-eslint/no-unsafe-assignment": "off",
     "@typescript-eslint/no-unsafe-call": "off",
-    "@typescript-eslint/no-unsafe-member-access": "off"
+    "@typescript-eslint/no-unsafe-member-access": "off",
+    "@typescript-eslint/no-non-null-assertion": "off",
+    "@typescript-eslint/explicit-module-boundary-types": "off"
   },
   "ignorePatterns": [
     "src/model/generated",
     "src/types",
-    "db"
+    "src/abis",
+    "db",
+    "typegen"
   ]
 }

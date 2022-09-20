@@ -5,7 +5,7 @@ import { GAUGE, ZERO_BI } from "../consts"
 import { Gauge, GaugePeriodState, GaugePoolState } from "../model"
 import * as GAUGE_CONTRACT from '../abis/Gauge'
 
-export async function getGauge(ctx: CommonHandlerContext<Store>) {
+export async function getGauge(ctx: CommonHandlerContext<Store>): Promise<Gauge> {
   let gauge = await ctx.store.get(Gauge, GAUGE)
   if (!gauge) {
     const gaugeContract = new GAUGE_CONTRACT.Contract(ctx, GAUGE)
@@ -31,7 +31,7 @@ export async function getGaugePeriodState(
   ctx: CommonHandlerContext<Store>,
   periodId: string,
   args?: { start: BigNumber, end: BigNumber }
-) {
+): Promise<GaugePeriodState> {
   let gaugePeriodState = await ctx.store.get(GaugePeriodState, periodId)
   if (!gaugePeriodState) {
     const gauge = await getGauge(ctx)
@@ -65,7 +65,7 @@ export async function getGaugePoolState(
     totalAmount?: BigNumber,
     score?: BigNumber
   }
-) {
+): Promise<GaugePoolState> {
   const id = `${periodId}-${poolId}`
   let gaugePoolState = await ctx.store.get(GaugePoolState, id)
   if (!gaugePoolState) {

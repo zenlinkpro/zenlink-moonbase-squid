@@ -14,31 +14,37 @@ import {
   ZenlinkMakerInfo
 } from "../model"
 
-export async function getTransaction(ctx: CommonHandlerContext<Store>, id: string) {
+export async function getTransaction(
+  ctx: CommonHandlerContext<Store>, 
+  id: string
+): Promise<Transaction | undefined> {
   const tx = await ctx.store.get(Transaction, id)
 
   return tx
 }
 
-export async function getPosition(ctx: CommonHandlerContext<Store>, id: string) {
+export async function getPosition(
+  ctx: CommonHandlerContext<Store>, 
+  id: string
+): Promise<LiquidityPosition | undefined> {
   const liquidityPosition = await ctx.store.get(LiquidityPosition, id)
 
   return liquidityPosition
 }
 
-export async function getBundle(ctx: CommonHandlerContext<Store>) {
+export async function getBundle(ctx: CommonHandlerContext<Store>): Promise<Bundle> {
   const bundle = await ctx.store.get(Bundle, '1')
 
   return bundle!
 }
 
-export async function getFactory(ctx: CommonHandlerContext<Store>) {
+export async function getFactory(ctx: CommonHandlerContext<Store>): Promise<Factory> {
   const factory = await ctx.store.get(Factory, FACTORY_ADDRESS)
 
   return factory!
 }
 
-export async function getStableSwapInfo(ctx: CommonHandlerContext<Store>) {
+export async function getStableSwapInfo(ctx: CommonHandlerContext<Store>): Promise<StableSwapInfo> {
   let stbleSwapInfo = await ctx.store.get(StableSwapInfo, {
     where: { id: '1' },
     relations: { swaps: true }
@@ -58,7 +64,7 @@ export async function getStableSwapInfo(ctx: CommonHandlerContext<Store>) {
   return stbleSwapInfo
 }
 
-export async function getZenlinkInfo(ctx: CommonHandlerContext<Store>) {
+export async function getZenlinkInfo(ctx: CommonHandlerContext<Store>): Promise<ZenlinkInfo> {
   let zenlinkInfo = await ctx.store.get(ZenlinkInfo, {
     where: { id: '1' },
     relations: { factory: true, stableSwapInfo: true }
@@ -79,7 +85,7 @@ export async function getZenlinkInfo(ctx: CommonHandlerContext<Store>) {
   return zenlinkInfo
 }
 
-export async function getZenlinkMakerInfo(ctx: CommonHandlerContext<Store>) {
+export async function getZenlinkMakerInfo(ctx: CommonHandlerContext<Store>): Promise<ZenlinkMakerInfo> {
   let zenlinkMakerInfo = await ctx.store.get(ZenlinkMakerInfo, ZENLINK_MAKER)
   if (!zenlinkMakerInfo) {
     zenlinkMakerInfo = new ZenlinkMakerInfo({
@@ -95,7 +101,7 @@ export async function getZenlinkMakerInfo(ctx: CommonHandlerContext<Store>) {
   return zenlinkMakerInfo
 }
 
-export async function getUser(ctx: CommonHandlerContext<Store>, id: string) {
+export async function getUser(ctx: CommonHandlerContext<Store>, id: string): Promise<User> {
   let user = await ctx.store.get(User, id)
   if (!user) {
     user = new User({
@@ -109,7 +115,11 @@ export async function getUser(ctx: CommonHandlerContext<Store>, id: string) {
   return user
 }
 
-export async function getvxzlkUserInfo(ctx: CommonHandlerContext<Store>, id: string, vxzlk: VxZLK) {
+export async function getvxzlkUserInfo(
+  ctx: CommonHandlerContext<Store>, 
+  id: string, 
+  vxzlk: VxZLK
+): Promise<VxZLKUserInfo> {
   let vxzlkUserInfo = await ctx.store.get(VxZLKUserInfo, id)
   if (!vxzlkUserInfo) {
     const user = await getUser(ctx, id)

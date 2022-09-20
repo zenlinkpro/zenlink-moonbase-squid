@@ -6,7 +6,7 @@ import { ZERO_BD } from "../consts";
 import { getOrCreateToken } from "../entities/token";
 import { getEvmLogArgs } from "../utils/helpers";
 
-export async function handleNewPair(ctx: EvmLogHandlerContext<Store>) {
+export async function handleNewPair(ctx: EvmLogHandlerContext<Store>): Promise<void> {
   const contractAddress = getEvmLogArgs(ctx).address.toLowerCase()
 
   const data = factoryAbi.events['PairCreated(address,address,address,uint256)']
