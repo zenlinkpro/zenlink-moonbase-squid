@@ -15,7 +15,7 @@ export async function getGauge(ctx: CommonHandlerContext<Store>): Promise<Gauge>
       voteToken: decodeHex(await gaugeContract.voteToken()),
       voteSetWindow: (await gaugeContract.voteSetWindow()).toBigInt(),
       voteDuration: (await gaugeContract.voteDuration()).toBigInt(),
-      nextVotePeriodID: 1,
+      nextVotePeriodID: 0,
       timestamp: BigInt(ctx.block.timestamp),
       updatedAt: new Date(ctx.block.timestamp),
       stablePoolIds: [],

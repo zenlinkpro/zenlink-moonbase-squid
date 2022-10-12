@@ -3,6 +3,7 @@ import { Store } from "@subsquid/typeorm-store";
 import * as GaugeContract from '../abis/Gauge'
 import { GAUGE } from "../consts";
 import { getGauge, getGaugePeriodState, getGaugePoolState } from "../entities/gauge";
+import { GaugePoolState } from "../model";
 import { getEvmLogArgs } from "../utils/helpers";
 
 export async function handleUpdateVoteSetWindow(ctx: EvmLogHandlerContext<Store>): Promise<void> {
@@ -29,14 +30,41 @@ export async function handleUpdateVotePeriod(ctx: EvmLogHandlerContext<Store>): 
   const event = GaugeContract.events['UpdateVotePeriod(uint256,uint256,uint256)']
     .decode(getEvmLogArgs(ctx))
   const { curPeriod, start, end } = event
-  const gaugePeriodState = await getGaugePeriodState(
+  const prevGaugePeriodState = await getGaugePeriodState(
+    ctx,
+    (curPeriod.toNumber() - 1).toString(),
+  )
+  const currentGaugePeriodState = await getGaugePeriodState(
     ctx,
     curPeriod.toString(),
     { start, end }
   )
-  gaugePeriodState.timestamp = BigInt(ctx.block.timestamp)
-  gaugePeriodState.updatedAt = new Date(ctx.block.timestamp)
-  await ctx.store.save(gaugePeriodState)
+  currentGaugePeriodState.totalAmount = prevGaugePeriodState.totalAmount
+  currentGaugePeriodState.timestamp = BigInt(ctx.block.timestamp)
+  currentGaugePeriodState.updatedAt = new Date(ctx.block.timestamp)
+  await ctx.store.save(currentGaugePeriodState)
+
+  const allPrevStates = await ctx.store.findBy(GaugePoolState, {
+    periodId: curPeriod.toNumber() - 1
+  })
+  for (const prevState of allPrevStates) {
+    const currentState = await getGaugePoolState(
+      ctx,
+      curPeriod.toString(),
+      prevState.poolId.toString()
+    )
+    currentState.inherit = true
+    if (!currentState.resetVotable) {
+      currentState.votable = prevState.votable
+    }
+    if (currentState.votable) {
+      currentGaugePeriodState.totalScore += prevState.totalAmount
+    }
+    currentState.totalAmount = prevState.totalAmount
+    currentState.score = prevState.totalAmount
+    await ctx.store.save(currentState)
+  }
+  await ctx.store.save(currentGaugePeriodState)
 }
 
 export async function handleSetVotablePools(ctx: EvmLogHandlerContext<Store>): Promise<void> {
@@ -91,7 +119,6 @@ export async function handleInheritPool(ctx: EvmLogHandlerContext<Store>): Promi
   ]
     .decode(getEvmLogArgs(ctx))
   const { poolId, curPeriod, amount, votable } = event
-  const gaugePeriodState = await getGaugePeriodState(ctx, curPeriod.toString())
   const gaugePoolState = await getGaugePoolState(
     ctx,
     curPeriod.toString(),
@@ -106,14 +133,6 @@ export async function handleInheritPool(ctx: EvmLogHandlerContext<Store>): Promi
   gaugePoolState.timestamp = BigInt(ctx.block.timestamp)
   gaugePoolState.updatedAt = new Date(ctx.block.timestamp)
   await ctx.store.save(gaugePoolState)
-
-  if (!gaugePoolState.resetVotable && votable) {
-    gaugePeriodState.totalScore += amount.toBigInt()
-  }
-  gaugePeriodState.totalAmount += amount.toBigInt()
-  gaugePeriodState.timestamp = BigInt(ctx.block.timestamp)
-  gaugePeriodState.updatedAt = new Date(ctx.block.timestamp)
-  await ctx.store.save(gaugePeriodState)
 }
 
 export async function handleUpdatePoolHistory(ctx: EvmLogHandlerContext<Store>): Promise<void> {
@@ -128,7 +147,6 @@ export async function handleUpdatePoolHistory(ctx: EvmLogHandlerContext<Store>):
     poolId.toString()
   )
   for (let i = needUpdatePool.toNumber(); i > lastPeriod.toNumber(); i--) {
-    const gaugePeriodState = await getGaugePeriodState(ctx, i.toString())
     const gaugePoolState = await getGaugePoolState(
       ctx,
       i.toString(),
@@ -144,14 +162,6 @@ export async function handleUpdatePoolHistory(ctx: EvmLogHandlerContext<Store>):
       gaugePoolState.timestamp = BigInt(ctx.block.timestamp)
       gaugePoolState.updatedAt = new Date(ctx.block.timestamp)
       await ctx.store.save(gaugePoolState)
-
-      if (!gaugePoolState.resetVotable && lastGaugePoolState.votable) {
-        gaugePeriodState.totalScore += lastPeriodAmount.toBigInt()
-      }
-      gaugePeriodState.totalAmount += lastPeriodAmount.toBigInt()
-      gaugePeriodState.timestamp = BigInt(ctx.block.timestamp)
-      gaugePeriodState.updatedAt = new Date(ctx.block.timestamp)
-      await ctx.store.save(gaugePeriodState)
     }
   }
 }
